@@ -1,0 +1,9 @@
+README.md
+setup.py
+clinproc.egg-info/PKG-INFO
+clinproc.egg-info/SOURCES.txt
+clinproc.egg-info/dependency_links.txt
+clinproc.egg-info/requires.txt
+clinproc.egg-info/top_level.txt
+tests/__init__.py
+tests/clinproc_tests.py
