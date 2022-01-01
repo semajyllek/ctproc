@@ -6,7 +6,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='clinproc',  
-    version='0.1.11',
+    version='0.1.12',
     description='library for processing clinical trials data from clinicaltrials.gov',
     long_description=long_description,
     long_description_content_type='text/markdown',  

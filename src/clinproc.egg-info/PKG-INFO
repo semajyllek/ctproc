@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: clinproc
-Version: 0.1.11
+Version: 0.1.12
 Summary: library for processing clinical trials data from clinicaltrials.gov
 Home-page: https://github.com/semajyllek/clinproc
 Author: James Kelly
@@ -28,7 +28,6 @@ The main api is through the `process_data` method, whose call definition with de
 values is shown below.
 
 ```
-
 from clinproc import process_data
 
 def process_data(
@@ -91,6 +90,10 @@ Thank you so much for being interested in this project. I have a ton of things I
 objects instead of returning dictionaries, next make a more rigorous eligbility parser that can handle some of the more tricky cases in the data.
 
 Please consider making a contribution if you think others would benefit!
+
+https://github.com/semajyllek/clinproc
+
+
 
 
 
