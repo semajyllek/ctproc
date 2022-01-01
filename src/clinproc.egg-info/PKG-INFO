@@ -1,3 +1,26 @@
+Metadata-Version: 2.1
+Name: clinproc
+Version: 0.1.11
+Summary: library for processing clinical trials data from clinicaltrials.gov
+Home-page: https://github.com/semajyllek/clinproc
+Author: James Kelly
+Author-email: mrkellyjam@gmail.com
+License: UNKNOWN
+Project-URL: Bug Reports, https://github.com/semajyllek/clinproc/issues
+Project-URL: Source, https://github.com/semajyllek/clinproc/
+Keywords: clinical,trials
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3 :: Only
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 
 This is a library for processing clinical trials data from clinicaltrials.gov
 It offers methods for parsing the XML and content fields of the documents.  
@@ -68,4 +91,6 @@ Thank you so much for being interested in this project. I have a ton of things I
 objects instead of returning dictionaries, next make a more rigorous eligbility parser that can handle some of the more tricky cases in the data.
 
 Please consider making a contribution if you think others would benefit!
+
+
 

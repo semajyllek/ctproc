@@ -1,0 +1,11 @@
+LICENSE
+README.md
+setup.py
+src/clinproc/__init__.py
+src/clinproc/proc.py
+src/clinproc.egg-info/PKG-INFO
+src/clinproc.egg-info/SOURCES.txt
+src/clinproc.egg-info/dependency_links.txt
+src/clinproc.egg-info/entry_points.txt
+src/clinproc.egg-info/requires.txt
+src/clinproc.egg-info/top_level.txt

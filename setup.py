@@ -1,45 +1,46 @@
+from setuptools import setup, find_packages
+import pathlib
 
-
-# I honestly don't know what this code does and copied it from an excellent blog post: https://towardsdatascience.com/deep-dive-create-and-publish-your-first-python-library-f7f618719e14
-
-from setuptools import setup,find_packages
-
-from codecs import open
-from os import path
-
-
-
-HERE = path.abspath(path.dirname(__file__))
-
-with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+here = pathlib.Path(__file__).parent.resolve()
+long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
-    name="clinproc",
-    version="0.1.0",
-    description="library for processing clinical trials data from clinicaltrials.gov",
+    name='clinproc',  
+    version='0.1.11',
+    description='library for processing clinical trials data from clinicaltrials.gov',
     long_description=long_description,
-    long_description_content_type="text/markdown",
-    author="James Kelly",
-    author_email="mrkellyjam@gmail.com",
-    license="MIT",
+    long_description_content_type='text/markdown',  
+    url='https://github.com/semajyllek/clinproc',
+    author='James Kelly',
+    author_email='mrkellyjam@gmail.com',
     classifiers=[
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Operating System :: OS Independent"
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        "Programming Language :: Python :: 3.10",
+        'Programming Language :: Python :: 3 :: Only',
     ],
-    packages=find_packages(exclude=["test"]),
-    include_package_data=True,
+    keywords='clinical, trials',
+    package_dir={'': 'src'},
+    packages=find_packages(where='src'),
+    python_requires='>=3.7',\
     install_requires=[
-        "lxml", 
-        "scispacy", 
-        "negspacy"
-        ]
+            'lxml',
+            'scispacy',
+            'negspacy'
+    ],
+
+    entry_points={  
+        'console_scripts': [
+            'clinproc=clinproc:main',
+        ],
+    },
+
+    project_urls={  
+        'Bug Reports': 'https://github.com/semajyllek/clinproc/issues',
+        'Source': 'https://github.com/semajyllek/clinproc/',
+    }
 )
 

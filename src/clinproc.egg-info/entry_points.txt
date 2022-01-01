@@ -1,0 +1,3 @@
+[console_scripts]
+clinproc = clinproc:main
+
