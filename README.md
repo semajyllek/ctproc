@@ -6,6 +6,7 @@ The main api is through the `process_data` method, with default values shown her
 ```
 from clinproc import process_data
 
+<<<<<<< HEAD
 processed_trials =  process_data(
 		        zip_data, 
 			write_file, 
@@ -19,6 +20,24 @@ processed_trials =  process_data(
     			id_to_print="", 
     			get_only=None
   		    )
+=======
+zip_data   = "/path/to/zip_folder"
+write_file = "/path/to/write/file.jsonl"
+
+processed_trials = process_data(
+                       zip_data, 
+                       write_file, 
+                       concat=False, 
+                       max_trials=1e7, 
+                       start=-1, 
+                       add_ents=True, 
+                       mnegs=True, 
+                       expand=True,
+                       remove_stops=True,
+                       id_to_print="", 
+                       get_only=None
+                   )
+>>>>>>> 94ff582a70985b6055c351ac6123e5b6fccf9f34
 ```
 
 Output will be jsonl format in that write location, one processed document per line.
