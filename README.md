@@ -1,25 +1,24 @@
 
 This is a library for processing clinical trials data from clinicaltrials.gov
 It offers methods for parsing the XML and content fields of the documents.  
-The main api is through the `process_data` method, whose call definition with default 
-values is shown below.
+The main api is through the `process_data` method, with default values shown here:
 
 ```
 from clinproc import process_data
 
-def process_data(
-    zip_data, 
-    write_file, 
-    concat=False, 
-    max_trials=1e7, 
-    start=-1, 
-    add_ents=True, 
-    mnegs=True, 
-    expand=True,
-    remove_stops=True,
-    id_to_print="", 
-    get_only=None
-  )
+processed_trials =  process_data(
+		        zip_data, 
+			write_file, 
+		        concat=False,
+			max_trials=1e7, 
+    			start=-1, 
+    			add_ents=True, 
+    			mnegs=True, 
+    			expand=True,
+    			remove_stops=True,
+    			id_to_print="", 
+    			get_only=None
+  		    )
 ```
 
 Output will be jsonl format in that write location, one processed document per line.
