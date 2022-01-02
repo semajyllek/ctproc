@@ -24,7 +24,7 @@ processed_trials = process_data(
                    )
 ```
 
-Output will be jsonl format in that write location, one processed document per line.
+Output will be `.jsonl` format in that write location, one processed document per line.
 This uses Zipfile so you don't have to uncompress your data.
 Some usefule features are the text processing utilities built into the `process_data` routine.
 
