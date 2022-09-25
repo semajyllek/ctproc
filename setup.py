@@ -30,9 +30,10 @@ setup(
             'lxml',
             'scispacy',
             'negspacy',
-            "https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_md-0.4.0.tar.gz"
     ],
-
+    dependency_links=[
+        "https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_md-0.4.0.tar.gz"
+    ],
     entry_points={  
         'console_scripts': [
             'clinproc=clinproc:main',
