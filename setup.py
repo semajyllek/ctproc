@@ -14,7 +14,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='clinproc',  
-    version='0.1.27',
+    version='0.1.28',
     description='library for processing clinical trials data from clinicaltrials.gov',
     long_description=long_description,
     long_description_content_type='text/markdown',  
@@ -38,10 +38,7 @@ setup(
             'lxml',
             'scispacy',
             'negspacy',
-            'en_core_sci_md==0.4.0' 
-    ],
-    dependency_links=[
-        "https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_md-0.4.0.tar.gz#egg=en_core_sci_md-0.4.0"
+            'en_core_sci_md @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_md-0.4.0.tar.gz#egg=en_core_sci_md-0.4.0' 
     ],
     entry_points={  
         'console_scripts': [
