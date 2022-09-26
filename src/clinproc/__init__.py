@@ -24,18 +24,7 @@ def process_data(
 
 """
 
-from clinproc.proc import (
-    clean_sentences,
-    check_sentences,
-    concat_all,
-    concatenate_data,
-    convert_docs_for_basic_filtering,
-    get_sentences,
-    nlp,
-    process_ct_file,
-    process_data,
-    process_eligibility_naive
-)
+from clinproc.proc import process_data
 import argparse
 
 parser = argparse.ArgumentParser(description='cli for clinproc process_data api')

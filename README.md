@@ -1,4 +1,6 @@
 
+### Project Description & API
+
 This is a library for processing clinical trials data from clinicaltrials.gov
 It offers methods for parsing the XML and content fields of the documents.  
 The main api is through the `process_data` method, with default values shown here:
@@ -48,7 +50,20 @@ somewhat structured block of text like shown below.
          -  primary care physician has already contributed 5 patients to the study
  ```
 
+### Installation
 
+You can use pip to install,
+```
+pip install clinproc
+```
+
+But due to pypi limitations to not including linked libraries, you will need to install the spaCy `en_core_sci_md` model like:
+```
+pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.1/en_core_sci_md-0.5.1.tar.gz
+```
+
+
+### What it Does:
 
 In particular the library methods break the `eligbility/criteria/textblock``block of text into inclusion and exclusion criteria,
 for further processing. This works in most cases but does break on difficult structures of this field where there are conditions of exclusion 
@@ -63,6 +78,9 @@ unless args are specified like:
 - alias expansion from raw text associated with linked CUI values, with an attempt to maintain sentence structure
 - an attempt at moving of negation in one criteria or the other to the oppsing field (inc -> exc, exc -> inc)
 - removal of stopword or a list of words from the contents field constructed by the concatenation methods
+
+
+
 
 
 Thank you so much for being interested in this project. I have a ton of things I want to do to it. First up make Document
