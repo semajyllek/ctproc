@@ -1,0 +1,37 @@
+[build-system]
+requires = [
+	"setuptools>=61.0",  
+    "lxml", 
+	"scispacy",
+    "negspacy"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clinproc"
+version = "0.1.30"
+authors = [
+  { name="James Kelly", email="mrkellyjam@gmail.com" },
+]
+description = "library for processing clinical trials data from clinicaltrials.gov"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers=[
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        "Programming Language :: Python :: 3.10",
+        'Programming Language :: Python :: 3 :: Only'
+    ]
+keywords= ["clinical", "trials"]
+
+[project.scripts]
+clinproc = "clinproc:main"
+
+
+
+[project.urls]
+"Homepage" = "https://github.com/semajyllek/clinproc/"
+"Bug Tracker" = "https://github.com/semajyllek/clinproc/issues"
