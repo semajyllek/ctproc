@@ -62,10 +62,11 @@ But due to pypi limitations to not including linked libraries, you will need to 
 pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.1/en_core_sci_md-0.5.1.tar.gz
 ```
 
+\*Note that the initial `import clinproc` will take a few minutes due to having to load the scispacy model.
 
 ### What it Does:
 
-In particular the library methods break the `eligbility/criteria/textblock``block of text into inclusion and exclusion criteria,
+In particular the library methods break the `eligbility/criteria/textblock` block of text into inclusion and exclusion criteria,
 for further processing. This works in most cases but does break on difficult structures of this field where there are conditions of exclusion 
 and inclusion mixed in with one another. It's also possible the structure could change entirely and other fields will come;
 this project is not affiliated with clinicaltrials.gov in any way.

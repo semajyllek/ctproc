@@ -121,7 +121,7 @@ class EligProcTestCase(unittest.TestCase):
     
     def test_proc_doc(self):
         """process an empty criteria block
-           it would normally be a list od processed documents, hence the indexing
+           it would normally be a list of processed documents, hence the indexing
         """
         self.assertEqual(test_doc, process_data(test_folder_path, test_write_path)[0])
         os.remove(test_write_path) 
