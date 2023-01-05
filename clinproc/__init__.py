@@ -24,7 +24,7 @@ def process_data(
 
 """
 
-from clinproc.proc import process_data
+from clinproc.proc import *
 
 # import argparse
 

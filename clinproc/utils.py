@@ -5,7 +5,7 @@ import re
 import json
 from lxml import etree
 from pathlib import Path
-from regex_patterns import *
+from clinproc.regex_patterns import *
 from typing import List, Optional, Set, Any
 
 

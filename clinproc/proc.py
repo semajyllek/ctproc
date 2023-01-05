@@ -10,17 +10,16 @@ from zipfile import ZipFile
 from pathlib import Path
 from lxml import etree
 from tqdm import tqdm
-import numpy as np
 import spacy
 import copy
 import json
 
-from utils import print_crit, filter_words, DONT_ALIAS
-from regex_patterns import EMPTY_PATTERN
+from clinproc.utils import print_crit, filter_words, DONT_ALIAS
+from clinproc.regex_patterns import EMPTY_PATTERN
 
-from ctconfig import CTConfig
-from ctdocument import CTDocument, EligCrit
-from eligibility import process_eligibility_naive
+from clinproc.ctconfig import CTConfig
+from clinproc.ctdocument import CTDocument, EligCrit
+from clinproc.eligibility import process_eligibility_naive
 
 
 
