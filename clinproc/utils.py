@@ -1,11 +1,13 @@
 
 import logging
-from re import I
-from lxml import etree
-from ctdocument import CTDocument
-from clinproc.regex_patterns import *
-from typing import List, Optional, Set
+
+import re
 import json
+from lxml import etree
+from pathlib import Path
+from regex_patterns import *
+from typing import List, Optional, Set, Any
+
 
 logger = logging.getLogger(__file__)
 
@@ -20,7 +22,7 @@ REMOVE_WORDS = ["criteria", "include", "exclude", "inclusion", "exclusion", "eli
 # I/O utils
 # -------------------------------------------------------------------------------------- #
 
-def save_docs_jsonl(docs: List[CTDocument], writefile: Path) -> None:
+def save_docs_jsonl(docs: List[Any], writefile: Path) -> None:
   """
   desc:    iteratively writes contents of docs as jsonl to writefile 
   """
@@ -52,18 +54,13 @@ def get_processed_docs(proc_loc):
 # -------------------------------------------------------------------------------------- #
 
 
-def remove_words(text: str, remove_words: Set[str]):
+def filter_words(text: str, remove_words: Set[str]):
   """
   text:         str of text to be filtered
   remove_words: set of words to remove
   """
   new_contents = [word for word in text.split() if word not in remove_words]
   return ' '.join(new_contents)
-
-
-
-def filter_stops(sent, stopwords: Set[str]):
-  return ' '.join([word for word in sent.split() if word.lower() not in stopwords])
 
 
 def clean_sentences(sent_list: List[str]):
@@ -108,16 +105,6 @@ def process_age_field(field_val):
     return convert_age_to_year(age, units)
   else:
     return None
-
-
-
-def get_processed_age(ct_doc: CTDocument, xml_root: etree.ElementTree) -> CTDocument:
-    field_val = xml_root.find('eligibility/criteria/textblock')
-    if field_val is None:
-      logger.info("no age field exists for this document")
-    
-    ct_doc.age = process_age_field(field_val.text)
-    return ct_doc
 
 
 

@@ -1,7 +1,7 @@
 
-
+import re
 from utils import clean_sentences, check_sentences
-from regex_patterns import *
+from regex_patterns import INC_ONLY_PATTERN, EXC_ONLY_PATTERN, BOTH_INC_AND_EXC_PATTERN
 
 
 #----------------------------------------------------------------#

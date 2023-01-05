@@ -17,14 +17,16 @@ class CTConfig(NamedTuple):
 
   """
   zip_data: Path
-  write_file: Path
+  add_nlp: bool = True
+  write_file: Path = 'ct_output.txt'
   concat: bool = False
   max_trials: float = 1e7
   start: int = -1
   add_ents: bool = True
-  mnegs: bool = True
+  move_negations: bool = True
   expand: bool = True
   remove_stops: bool = True
   id_to_print: Optional[str] = None
   get_only: Optional[bool] = None
+  save_data: bool = True
 
