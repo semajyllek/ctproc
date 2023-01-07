@@ -1,8 +1,7 @@
 
-
 import unittest
 from pathlib import Path
-from clinproc.proc import ClinProc
+from clinproc.proc import ClinProc, CTDocument, EligCrit
 from clinproc.ctconfig import CTConfig
 from clinproc.eligibility import process_eligibility_naive
 
@@ -61,72 +60,53 @@ exc_norm = [
         ]
 
 
-test_doc = {
-        'id': 'NCT00000202', 
-        'brief_title': 'Buprenorphine Maintenance for Opioid Addicts - 1', 
-        'eligibility/criteria/textblock': {
-                    'raw_text': '\n        Please contact site for information.\n      ', 
-                    'include_criteria': ['Please contact site for information.'], 
-                    'exclude_criteria': []
-        }, 
-        'eligibility/gender': 'Both', 
-        'eligibility/minimum_age': 18.0, 
-        'eligibility/maximum_age': 65.0, 
-        'detailed_description/textblock': None, 
-        'condition': ['Opioid-Related Disorders'], 
-        'condition/condition_browse': [], 
-        'intervention/intervention_type': ['Drug'], 
-        'intervention/intervention_name': ['Buprenorphine'], 
-        'intervention_browse/mesh_term': 'Buprenorphine', 
-        'contents': 'The purpose of this study is to evaluate the efficacy of buprenorphine and desipramine in treatment of opiate and cocaine dependence.', 
-        'inc_no_stop': ['contact site information.'], 
-        'exc_no_stop': [], 
-        'inc_ents': [[
-            {
-                'raw_text': 'contact site', 'label': 'ENTITY', 'start': 7, 'end': 19, 'cui': {'val': 'C2752541', 'score': 1.0}, 
-                'alias_expansion': [], 'negation': False
-            }, 
-            {
-                'raw_text': 'information', 'label': 'ENTITY', 'start': 24, 'end': 35, 'cui': {'val': 'C0870705', 'score': 0.9999998807907104}, 
-                'alias_expansion': ['information'], 'negation': False
-            }
-        ]], 
-        'exc_ents': [], 
-        'moved_negs': {
-            'include_criteria': ['Please contact site for information.'], 
-            'exclude_criteria': [], 
-            'inc_ents': [[
-            {
-            'raw_text': 'contact site', 'label': 'ENTITY', 'start': 7, 'end': 19, 'cui': {'val': 'C2752541', 'score': 1.0}, 
-            'alias_expansion': [], 'negation': False
-            }, 
-            {
-            'raw_text': 'information', 'label': 'ENTITY', 'start': 24, 'end': 35, 'cui': {'val': 'C0870705', 'score': 0.9999998807907104}, 
-            'alias_expansion': ['information'], 'negation': False
-            }
-            ]], 
-            'exc_ents': []
-        }, 
-        'alias_crits': {
-            'inc_alias_crits': ['Please contact site for information.'], 
-            'exc_alias_crits': []
-        }
-        }
+
+test_elig_crit = EligCrit("\n        Inclusion Criteria:\n\n          -  unexplained left ventricular hypertrophy\n\n        Exclusion Criteria:\n\n          -  isolated septal hypertrophy\n      ")
+test_elig_crit.include_criteria = ['unexplained left ventricular hypertrophy']
+test_elig_crit.exclude_criteria = ['isolated septal hypertrophy']
+
+test_doc = CTDocument('NCT02221141')
+test_doc.condition = ['Left Ventricular Hypertrophy']
+test_doc.elig_crit = test_elig_crit
+test_doc.elig_gender = 'All'
+test_doc.elig_min_age: 18.0
+test_doc.inc_filtered = ['unexplained left ventricular hypertrophy']
+test_doc.exc_filtered = ['isolated septal hypertrophy']
+test_doc.inc_ents = [[{'raw_text': 'unexplained', 'label': 'ENTITY', 'start': 0, 'end': 11, 'cui': {'val': 'C4288071', 'score': 0.9999999403953552}, 'alias_expansion': ['Unexplained'], 'negation': False}, {'raw_text': 'left ventricular hypertrophy', 'label': 'ENTITY', 'start': 12, 'end': 40, 'cui': {'val': 'C0149721', 'score': 1.0}, 'alias_expansion': ['lv hypertrophy', 'Enlarged left ventricle'], 'negation': False}]]
+test_doc.exc_ents = [[{'raw_text': 'isolated', 'label': 'ENTITY', 'start': 0, 'end': 8, 'cui': {'val': 'C0205409', 'score': 1.0}, 'alias_expansion': ['Isolated', 'isolated'], 'negation': False}, {'raw_text': 'septal hypertrophy', 'label': 'ENTITY', 'start': 9, 'end': 27, 'cui': {'val': 'C0442887', 'score': 1.0}, 'alias_expansion': ['septal hypertrophy', 'hypertrophy septal'], 'negation': False}]]
+test_doc.moved_negs = {
+    'include_criteria': ['unexplained left ventricular hypertrophy'], 
+    'exclude_criteria': ['isolated septal hypertrophy'], 
+    'inc_ents': [[
+        {'raw_text': 'unexplained', 'label': 'ENTITY', 'start': 0, 'end': 11, 'cui': {'val': 'C4288071', 'score': 0.9999999403953552}, 'alias_expansion': ['Unexplained'], 'negation': False}, 
+        {'raw_text': 'left ventricular hypertrophy', 'label': 'ENTITY', 'start': 12, 'end': 40, 'cui': {'val': 'C0149721', 'score': 1.0}, 'alias_expansion': ['lv hypertrophy', 'Enlarged left ventricle'], 'negation': False}]], 
+    'exc_ents': [[
+        {'raw_text': 'isolated', 'label': 'ENTITY', 'start': 0, 'end': 8, 'cui': {'val': 'C0205409', 'score': 1.0}, 'alias_expansion': ['Isolated', 'isolated'], 'negation': False}, 
+        {'raw_text': 'septal hypertrophy', 'label': 'ENTITY', 'start': 9, 'end': 27, 'cui': {'val': 'C0442887', 'score': 1.0}, 'alias_expansion': ['septal hypertrophy', 'hypertrophy septal'], 'negation': False}]]
+}
 
 
 
-test_folder_path = Path(__file__).parent.joinpath("CT_test_folder.zip").as_posix()
+test_folder_path = Path(__file__).parent.joinpath("ct_test_data.zip").as_posix()
 
 class EligProcTestCase(unittest.TestCase):
 
     
-    # def test_proc_doc(self):
+    # def test_doc_proc(self):
+        
     #     """process an empty criteria block
     #        it would normally be a list of processed documents, hence the indexing
     #     """
-    #     ct_doc = ClinProc(CTConfig(test_folder_path))
-    #     self.assertEqual(test_doc, list(ct_doc.process_data())[0].__dict__)
-    
+    #     self.maxDiff = None
+    #     id_ = 'NCT02221141'
+    #     cp = ClinProc(CTConfig(test_folder_path, id_to_print=id_, max_trials=25))
+    #     id2doc = {res.nct_id : res for res in cp.process_data()}
+    #     id_doc = id2doc[id_]
+
+    #     self.assertEqual(test_doc.elig_crit.__dict__, id_doc.elig_crit.__dict__)
+    #     self.assertEqual(test_doc.condition, id_doc.condition)
+    #     self.assertEqual(test_doc.inc_ents, id_doc.inc_ents)
+
     
     def test_normal(self):
         """process a criteria blook with include and exclude criteria"""
@@ -139,7 +119,7 @@ class EligProcTestCase(unittest.TestCase):
 
 
     def test_exc_only(self):
-        """process a critieria block with include only criteria"""
+        """process a critieria block with exclude only criteria"""
         self.assertEqual(process_eligibility_naive(exc_only_crit), ([], exc_norm))
 
 

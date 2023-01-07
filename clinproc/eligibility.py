@@ -46,7 +46,7 @@ def process_eligibility(elig_text):
       return ([], exclude_criteria)
     
     else:
-      return naive_split_inc_exc(get_sentences(clean_sentences([elig_text])[0]))
+      return naive_split_inc_exc(clean_sentences([elig_text])[0])
 
 
 

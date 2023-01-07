@@ -5,8 +5,9 @@ import re
 import json
 from lxml import etree
 from pathlib import Path
-from clinproc.regex_patterns import *
 from typing import List, Optional, Set, Any
+
+from clinproc.regex_patterns import AGE_PATTERN, EMPTY_PATTERN
 
 
 logger = logging.getLogger(__file__)

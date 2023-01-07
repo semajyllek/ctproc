@@ -3,23 +3,24 @@
 
 import logging
 
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple
-from scispacy.linking import EntityLinker 
-from negspacy.negation import Negex
-from zipfile import ZipFile
-from pathlib import Path
-from lxml import etree
-from tqdm import tqdm
-import spacy
 import copy
 import json
+import spacy
+from tqdm import tqdm
+from lxml import etree
+from pathlib import Path
+from zipfile import ZipFile
+from negspacy.negation import Negex
+from scispacy.linking import EntityLinker 
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple
 
-from clinproc.utils import print_crit, filter_words, DONT_ALIAS
-from clinproc.regex_patterns import EMPTY_PATTERN
+
 
 from clinproc.ctconfig import CTConfig
+from clinproc.regex_patterns import EMPTY_PATTERN
 from clinproc.ctdocument import CTDocument, EligCrit
 from clinproc.eligibility import process_eligibility_naive
+from clinproc.utils import print_crit, filter_words, DONT_ALIAS
 
 
 
@@ -57,9 +58,9 @@ class ClinProc:
 
   def process_data(self) -> Generator[None, None, CTDocument]:
     """
-    desc:
-    returns:
-   
+    desc:       main method for processing a zipped file of clinical trial XML documents from clinicaltrials.gov
+                parameterized by CTConfig the self ClinProc object was initialized with
+    returns:    yields processed CTDocuments one at a time
     """
 
     with ZipFile(self.config.zip_data, 'r') as zip:
@@ -67,9 +68,13 @@ class ClinProc:
       with open(self.config.write_file, "w") as outfile:
         for ct_file in tqdm(zip.namelist()):
           if ct_file.endswith('xml') and (i < self.config.max_trials) and (i > self.config.start):
+            print(f"ct file being processed: {ct_file}")
             if (self.config.get_only is not None) and (Path(ct_file).name[:-4] not in self.config.get_only):
               continue 
             result_doc = self.process_ct_file(zip.open(ct_file, 'r'), self.config.id_to_print)
+            if result_doc.elig_crit is None:
+              print("no eligibility crit!!!")
+              continue
 
             if result_doc is not None:
               if self.config.concat:
@@ -83,6 +88,9 @@ class ClinProc:
               if self.config.add_nlp:
                 if self.config.add_ents:
                   result_doc = self.add_entities(result_doc)
+
+                #if self.add_aliases:
+
                   
                 if self.config.move_negations:
                   result_doc, _ = self.move_doc_negs(result_doc)
@@ -96,7 +104,7 @@ class ClinProc:
 
           i += 1
             
-    print(f"Total nunmber of trials documents processed: {i}")
+    logger.info(f"Total nunmber of trials documents processed: {i}")
 
 
 
@@ -106,7 +114,7 @@ class ClinProc:
   #----------------------------------------------------------------------------------------------#
 
 
-  def process_ct_file(self, xml_filereader, id_to_print=""):
+  def process_ct_file(self, xml_filereader, id_to_print: Optional[str]):
     """
     xml_filereader:  specific type of object passed from process_data(),
                       used by parsexml library etree.parse() to get tree,
@@ -139,9 +147,10 @@ class ClinProc:
     ct_doc = self.get_eligibility(ct_doc, root)
 
     if ct_doc.nct_id == id_to_print:
-      print_crit(ct_doc.eligibility_criteria.include_criteria, ct_doc.eligibility_criteria.exclude_criteria)
+      print_crit(ct_doc.elig_crit.include_criteria, ct_doc.elig_crit.exclude_criteria)
                       
     ct_doc.process_doc_age(root) 
+
 
     # other fields... required_fields[field] = clean_sentences([field_val])[0]
     return ct_doc
@@ -265,9 +274,9 @@ class ClinProc:
         added += add_len    
 
       if field_type == "topic":
-        ct_doc.elig_crit._asdict()[alias_field].append(new_crit.strip())
+        ct_doc.elig_crit.__dict__[alias_field].append(new_crit.strip())
       else:
-        ct_doc.alias_crits[alias_field].append(new_crit)
+        ct_doc.aliased_crits[alias_field].append(new_crit)
 
     return ct_doc
     
@@ -307,9 +316,9 @@ class ClinProc:
 
 
 
-  #--------------------------------------------------------------------
+  #--------------------------------------------------------------------------------------------------#
   # methods for moving negations
-  #--------------------------------------------------------------------
+  #--------------------------------------------------------------------------------------------------#
 
 
   def move_all_negs(self, docs: List[CTDocument], inc_or_exc="inc", end_counts=None) -> Tuple[int, int]:
@@ -325,7 +334,7 @@ class ClinProc:
 
 
 
-  def move_doc_negs(self, ct_doc: CTDocument, inc_or_exc="inc", end_counts=None) -> Tuple[CTDocument, int]:
+  def move_doc_negs(self, ct_doc: CTDocument, inc_or_exc="inc") -> Tuple[CTDocument, int]:
     new_crits = []
     new_ent_sents = []
     changes = 0
@@ -353,20 +362,16 @@ class ClinProc:
         if ent['negation']:
           neg_found = True
           
-          text_start, text_end, ent_end = self.get_neg_text_begin_end(ent, ent_sent)
+          text_start, text_end, ent_end = self.get_neg_text_begin_end(ent, ent_sent, i)
 
           # stuff for the beginning and end of remaming string and corresponding ent lists
           end_part = crit[text_end:]
           start_part = crit[:text_start]
           ent_start_part = ent_sent[:ent_start]
-          ent_end_part = ent_sent[ent_end:]
-          new_crit = ""
-          new_ent_sent = []
-          other_ent = []
-          
+          ent_end_part = ent_sent[ent_end:]      
           other_crit = crit[text_start:text_end]
 
-          good_end = self.get_good_neg_end(start_part, ent_start_part)
+          good_end, new_crit, new_ent_sent = self.get_good_neg_end(start_part, ent_start_part)
           if good_end is not None:
             other_crit = good_end + ' ' + other_crit # could be severe, significant, etc. 
           other_ent = ent_sent[ent_start:ent_end]
@@ -398,6 +403,7 @@ class ClinProc:
     ct_doc.moved_negs[ent_field] = new_ent_sents
     return ct_doc, changes
     
+
   
   def get_neg_fields(self, inc_or_exc: str) -> Tuple[str, str, str, str]:
     # allows moving negation from inc to exc or vice versa
@@ -415,7 +421,7 @@ class ClinProc:
     return crit_field, ent_field, other_crit_field, other_ent_field
 
 
-  def get_neg_text_begin_end(self, ent, ent_sent) -> Tuple[int, int, int]:
+  def get_neg_text_begin_end(self, ent, ent_sent, i) -> Tuple[int, int, int]:
     text_start = ent['start']                      # find the place in the criteria string where the negated entitiy raw string starts
     while (i < len(ent_sent) - 1) and ent_sent[i+1]['negation']: # get all of the text and relative ents associated with that negated span
       i += 1
@@ -426,9 +432,11 @@ class ClinProc:
 
 
 
-  def get_good_and_bad_neg_end(self, start_part: str, ent_start_part: str, end_counts: int) -> Optional[str]:
+  def get_good_neg_end(self, start_part: str, ent_start_part: str) -> Tuple[Optional[str], str, List[str]]:
+    new_crit = ""
+    new_ent_sent = []
     bad_end_exists = True
-    if (len(start_part.strip().split()) > 3) and not self.check_if_bad_end(start_part, end_counts):
+    if (len(start_part.strip().split()) > 3) and not self.check_if_bad_end(start_part):
       new_crit += start_part
       new_ent_sent += ent_start_part
       bad_end_exists = False
@@ -438,15 +446,13 @@ class ClinProc:
     else:
       good_end = None
     
-    return good_end
+    return good_end, new_crit, new_ent_sent
 
 
 
-  def check_if_bad_end(self, sent, end_counts=None) -> bool:
+  def check_if_bad_end(self, sent) -> bool:
     bad_ends = ["be", "have", "to", "with", "for", "of", "no", "not", "other", "been"]
-    last_word = sent.split()[-1]
-    if end_counts is not None:
-      end_counts[last_word] += 1
+    last_word = sent.split()[-1] 
     for be in bad_ends:
       if last_word == be:
         return True
@@ -466,9 +472,9 @@ class ClinProc:
 
 
 
-  #--------------------------------------------------------------------
+  #--------------------------------------------------------------------------------------#
   # methods for reformatting text
-  #--------------------------------------------------------------------
+  #--------------------------------------------------------------------------------------#
 
   def get_sentences(self, textblock: str) -> List[str]:
     """
@@ -488,8 +494,8 @@ class ClinProc:
     filtered = {}
     filtered['nct_id'] = ct_doc.nct_id
     filtered['min_age'] = ct_doc.elig_min_age
-    filtered['max_age'] = ct_doc['eligibility/maximum_age']
-    filtered['gender'] = ct_doc['eligibility/gender']
+    filtered['max_age'] = ct_doc.elig_max_age
+    filtered['gender'] = ct_doc.elig_gender
     filtered['include_cuis'] = ' '.join([ent['cui']['val'] for ent in ct_doc.inc_ents])
     filtered['exclude_cuis'] = ' '.join([ent['cui']['val'] for ent in ct_doc.exc_ents])
     return filtered
@@ -549,9 +555,77 @@ class ClinProc:
 
 
 
+
+
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description='cli for clinproc process_data api')
+    parser.add_argument('--zip_data', help='pathlike to a zipped folder containing XML CT trial data')
+    parser.add_argument('--write_file', help='pathlike to write location for jsonl file created, one processed trial per line')
+
+
+
+    parser.add_argument('--concat', action='store_true',
+                        help='Boolean, whether to concatenate all fields into a single content field (in addition to other parsed fields), default=False')
+
+    parser.add_argument('--max_trials', type=int, default=1e7,
+                        help='Integer for max number of files to process, default=1e7')
+
+
+    parser.add_argument('--start_index', type=int, default=-1,
+                        help='Integer specifying which index (minus 1) to start at. Useful for debugging or stopped processes, default=-1')
+
+
+    parser.add_argument('--add_ents', action='store_false',
+                        help='Boolean, whether to add a field for representing criterias as entities, default=True')
+
+
+    parser.add_argument('--mnegs', action='store_false',
+                        help='Boolean, whether to add a field for representing criterias with negative phrases moved to new independent opposite criteria, default=True')
+
+
+    parser.add_argument('--expand', action='store_false',
+                        help='Boolean, whether to add a field for representing criterias as expansions of entity-related text values, default=True')
+
+
+
+    parser.add_argument('--remove_stops', action='store_false',
+                        help='Boolean, whether to add a field for representing criterias without stopwords, default=True')
+
+
+    parser.add_argument('--id_to_print', default="",
+                        help='String, an ID like NCT81001 supplied by user for printing a single processed clinical trial, debug info. default="')
+
+
+    parser.add_argument('--get_only', default=None, nargs='+', 
+                        help="List of strings, user supplied list of NCTID's to process, useful for debugging, default=None")
+
+
+
+    args = parser.parse_args()
+
     data = '/Users/jameskelly/Documents/cp/clinproc/clinproc/tests/CT_test_folder.zip'
-    cp = ClinProc(CTConfig(data))
-    docs = [doc for doc in cp.process_data()]
-    print(docs[0])
+
+    ct_config = CTConfig(
+      zip_data=args.zip_data, 
+      write_file=args.write_file, 
+      concat=args.concat, 
+      max_trials=args.max_trials, 
+      start=args.start_index, 
+      add_ents=args.add_ents, 
+      mnegs=args.mnegs, 
+      expand=args.expand,
+      remove_stops=args.remove_stops,
+      id_to_print=args.id_to_print, 
+      get_only=args.get_only
+    )
+
+    cp = ClinProc(ct_config)
+    for d in cp.process_data():
+      print(d.__dict__)
+      break
+
+
+
 

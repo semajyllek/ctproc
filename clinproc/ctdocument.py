@@ -17,6 +17,9 @@ class EligCrit:
         self.raw_text: str = raw_text
         self.include_criteria: List[str] = []
         self.exclude_criteria: List[str] = []
+
+    def __str__(self) -> str:
+        return repr(f"raw_text:\n{self.raw_text}\ninclude_criteria:\n{self.include_criteria}\nexclude_criteria:\n{self.exclude_criteria}\n")
     
 
 
@@ -112,9 +115,21 @@ class CTDocument:
  
 
     def process_doc_age(self, xml_root: etree.ElementTree) -> None:
-        field_val = xml_root.find('eligibility/criteria/textblock')
+        min_age = self.process_doc_age_helper(xml_root, 'eligibility/minimum_age') 
+        if min_age is not None:
+             self.elig_min_age = min_age
+        
+        max_age = self.process_doc_age_helper(xml_root, 'eligibility/maximum_age')
+        if max_age is not None:
+            self.elig_max_age = max_age
+    
+    def process_doc_age_helper(self, xml_root: etree.ElementTree, age_field: str) -> None:
+        field_val = xml_root.find(age_field)
         if field_val is None:
             logger.info("no age field exists for this document")
-            
-        self.age = process_age_field(field_val.text)
+            return None
+        age =  process_age_field(field_val.text)
+        return age
+       
+
     
