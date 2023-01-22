@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="clinproc",
-    version="0.2.3",
+    version="0.2.4",
     author="James Kelly",
     author_email="mrkellyjam@gmail.com",
     description="library for processing clinical trials data from clinicaltrials.gov",
