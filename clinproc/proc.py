@@ -82,10 +82,10 @@ class ClinProc:
               
               result_doc.make_content_field()
 
-              if self.config.remove_stops:
-                result_doc = self.filter_crit(result_doc, words_to_remove=self.STOP_WORDS)
-
               if self.config.add_nlp:
+                if self.config.remove_stops:
+                  result_doc = self.filter_crit(result_doc, words_to_remove=self.STOP_WORDS)
+                  
                 if self.config.add_ents:
                   result_doc = self.add_entities(result_doc)
 

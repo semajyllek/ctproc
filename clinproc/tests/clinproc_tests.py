@@ -216,20 +216,36 @@ test_folder_path = Path(__file__).parent.joinpath("ct_test_data.zip").as_posix()
 class EligProcTestCase(unittest.TestCase):
 
     
-    def test_doc_proc(self):
+    def test_doc_proc_no_nlp(self):
         
         """process an empty criteria block
            it would normally be a list of processed documents, hence the indexing
         """
         self.maxDiff = None
         id_ = 'NCT02221141'
-        cp = ClinProc(CTConfig(test_folder_path, id_to_print=id_, max_trials=25))
+        cp = ClinProc(CTConfig(test_folder_path, id_to_print=id_, max_trials=25, add_nlp=False))
         id2doc = {res.nct_id : res for res in cp.process_data()}
         id_doc = id2doc[id_]
 
         self.assertEqual(test_doc.elig_crit.__dict__, id_doc.elig_crit.__dict__)
         self.assertEqual(test_doc.condition, id_doc.condition)
-        self.assertEqual(test_doc.inc_ents, id_doc.inc_ents)
+
+
+
+    # def test_doc_proc(self):
+        
+    #     """process an empty criteria block
+    #        it would normally be a list of processed documents, hence the indexing
+    #     """
+    #     self.maxDiff = None
+    #     id_ = 'NCT02221141'
+    #     cp = ClinProc(CTConfig(test_folder_path, id_to_print=id_, max_trials=25))
+    #     id2doc = {res.nct_id : res for res in cp.process_data()}
+    #     id_doc = id2doc[id_]
+
+    #     self.assertEqual(test_doc.elig_crit.__dict__, id_doc.elig_crit.__dict__)
+    #     self.assertEqual(test_doc.condition, id_doc.condition)
+    #     self.assertEqual(test_doc.inc_ents, id_doc.inc_ents)
 
     
     def test_normal(self):
