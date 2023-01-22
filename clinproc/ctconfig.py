@@ -17,7 +17,7 @@ class CTConfig(NamedTuple):
 
   """
   zip_data: Path
-  add_nlp: bool = True
+  add_nlp: bool = False
   write_file: Path = 'ct_output.txt'
   concat: bool = False
   max_trials: float = 1e7

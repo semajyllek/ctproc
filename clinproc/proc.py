@@ -47,7 +47,13 @@ class ClinProc:
 
   def add_nlp(self):
     #np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning) 
-    self.NLP = spacy.load("en_core_sci_md") 
+
+    # this requires the package to be installed!
+    try:
+      self.NLP = spacy.load("en_core_sci_md")
+    except RuntimeError:
+      logger.error("you must install en_core_sci_md separately to use the add_nlp features, i.e.: pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_md-0.4.0.tar.gz")
+
     self.NLP.add_pipe("scispacy_linker", config={"resolve_abbreviations": True, "linker_name": "umls"})
     self.NLP.add_pipe("negex")
     self.linker = self.NLP.get_pipe("scispacy_linker")
@@ -85,7 +91,7 @@ class ClinProc:
               if self.config.add_nlp:
                 if self.config.remove_stops:
                   result_doc = self.filter_crit(result_doc, words_to_remove=self.STOP_WORDS)
-                  
+
                 if self.config.add_ents:
                   result_doc = self.add_entities(result_doc)
 
