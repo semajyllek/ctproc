@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="clinproc",
-    version="0.2.0",
+    version="0.2.1",
     author="James Kelly",
     author_email="mrkellyjam@gmail.com",
     description="library for processing clinical trials data from clinicaltrials.gov",
@@ -21,5 +21,13 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7',
-    install_requires=['lxml', 'spacy == 3.0.1', 'scispacy', 'negspacy', 'scipy'],
+    install_requires=[
+        'lxml', 
+        'spacy == 3.0.1',
+         'scispacy',
+         'negspacy', 
+         'scipy', 
+         'matplotlib', 
+         'pandas'
+    ],
 )
