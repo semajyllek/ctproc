@@ -6,8 +6,8 @@ import json
 from lxml import etree
 from typing import Dict, List, Optional, Set, Union
 
-from clinproc.regex_patterns import AGE_PATTERN
-from clinproc.utils import get_str_or_none, data_to_str, process_age_field, filter_words
+from ctproc.regex_patterns import AGE_PATTERN
+from ctproc.utils import get_str_or_none, data_to_str, process_age_field, filter_words
 
 logger = logging.getLogger(__file__)
 

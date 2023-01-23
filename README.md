@@ -6,24 +6,27 @@ It offers methods for parsing the XML and content fields of the documents.
 The main api is through the `process_data` method, with default values shown here:
 
 ```
-from clinproc import process_data
+from ctproc import CTConfig, CTProc
 
 zip_data   = "/path/to/zip_folder"
 write_file = "/path/to/write/file.jsonl"
 
-processed_trials = process_data(
-                       zip_data, 
-                       write_file, 
-                       concat=False, 
-                       max_trials=1e7, 
-                       start=-1, 
-                       add_ents=True, 
-                       mnegs=True, 
-                       expand=True,
-                       remove_stops=True,
-                       id_to_print="", 
-                       get_only=None
-                   )
+id_ = 'NCT00001444'
+config = CTConfig(
+    zip_data=zip_data, 
+    write_file=write_file,
+    id_to_print=id_, 
+    max_trials=25,
+    add_nlp=True       # must have en_core_sci_md spaCy model installed
+)
+
+cp = ClinProc(config)
+id2doc = {res.nct_id : res for res in cp.process_data()}
+id_doc = id2doc[id_]
+
+print(id_doc.elig_crit.include_criteria)
+
+
 ```
 
 Output will be `.jsonl` format in that write location, one processed document per line.
@@ -54,7 +57,7 @@ somewhat structured block of text like shown below.
 
 You can use pip to install,
 ```
-pip install clinproc
+pip install ctproc
 ```
 
 But due to pypi limitations to not including linked libraries, you will need to install the spaCy `en_core_sci_md` model like:
@@ -62,7 +65,7 @@ But due to pypi limitations to not including linked libraries, you will need to 
 pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.1/en_core_sci_md-0.5.1.tar.gz
 ```
 
-\*Note that the initial `import clinproc` will take a few minutes due to having to load the scispacy model.
+\*Note that the initial `import ctproc` will take a few minutes due to having to load the scispacy model.
 
 ### What it Does:
 
@@ -82,14 +85,12 @@ unless args are specified like:
 
 
 
+TODO:
+
+- construct a module to identify labs and ranges in the criteria data (to be used by ctmatch to match with values in the patient descriptions)
 
 
-Thank you so much for being interested in this project. I have a ton of things I want to do to it. First up make Document
-objects instead of returning dictionaries, next make a more rigorous eligbility parser that can handle some of the more tricky cases in the data.
-
-Please consider making a contribution if you think others would benefit!
-
-https://github.com/semajyllek/clinproc
+https://github.com/semajyllek/ctproc
 
 
 

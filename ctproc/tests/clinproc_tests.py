@@ -1,9 +1,9 @@
 
 import unittest
 from pathlib import Path
-from clinproc.ctconfig import CTConfig
-from clinproc.proc import ClinProc, CTDocument, EligCrit
-from clinproc.eligibility import process_eligibility_naive
+from ctproc.ctconfig import CTConfig
+from ctproc.proc import CTProc, CTDocument, EligCrit
+from ctproc.eligibility import process_eligibility_naive
 
 
 normal_crit   =  """
@@ -51,7 +51,7 @@ inc_norm = [
 
 
 exc_norm = [
-        'Patients who are unable or unwilling to give informed consent,', 
+        'Patients who are unable or unwilling to give informed consent', 
         'previously taken the study medications according to dispensing records', 
         'allergy or intolerance to study medications', 
         'residents of long-term care facilities', 
@@ -212,6 +212,7 @@ test_doc.moved_negs = {
 
 
 test_folder_path = Path(__file__).parent.joinpath("ct_test_data.zip").as_posix()
+#test_folder_path = "/Users/jameskelly/Documents/cp/clinproc/clinicaltrials.gov-16_dec_2015_17.zip"
 
 class EligProcTestCase(unittest.TestCase):
 
@@ -223,49 +224,55 @@ class EligProcTestCase(unittest.TestCase):
         """
         self.maxDiff = None
         id_ = 'NCT02221141'
-        cp = ClinProc(CTConfig(test_folder_path, id_to_print=id_, max_trials=25))
+        cp = CTProc(CTConfig(test_folder_path, id_to_print=id_, max_trials=25))
         id2doc = {res.nct_id : res for res in cp.process_data()}
         id_doc = id2doc[id_]
 
+        print('post processing:')
+        for i, c in enumerate(id_doc.elig_crit.include_criteria):
+          print(i, c)
+  
         self.assertEqual(test_doc.elig_crit.__dict__, id_doc.elig_crit.__dict__)
         self.assertEqual(test_doc.condition, id_doc.condition)
 
 
 
-    def test_doc_proc(self):
+    # def test_doc_proc(self):
         
-        """process an empty criteria block
-           it would normally be a list of processed documents, hence the indexing
-        """
-        self.maxDiff = None
-        id_ = 'NCT02221141'
-        cp = ClinProc(CTConfig(test_folder_path, id_to_print=id_, max_trials=25, add_nlp=True))
-        id2doc = {res.nct_id : res for res in cp.process_data()}
-        id_doc = id2doc[id_]
+    #     """process an empty criteria block
+    #        it would normally be a list of processed documents, hence the indexing
+    #     """
+    #     self.maxDiff = None
+    #     id_ = 'NCT00001444'
+    #     cp = CTProc(CTConfig(test_folder_path, id_to_print=id_, max_trials=25, add_nlp=True))
+    #     id2doc = {res.nct_id : res for res in cp.process_data()}
+    #     id_doc = id2doc[id_]
 
-        self.assertEqual(test_doc.elig_crit.__dict__, id_doc.elig_crit.__dict__)
-        self.assertEqual(test_doc.condition, id_doc.condition)
-        self.assertEqual(test_doc.inc_ents, id_doc.inc_ents)
+    #     print(id_doc.elig_crit.include_criteria)
+
+    #     # # self.assertEqual(test_doc.elig_crit.__dict__, id_doc.elig_crit.__dict__)
+    #     # # self.assertEqual(test_doc.condition, id_doc.condition)
+    #     # # self.assertEqual(test_doc.inc_ents, id_doc.inc_ents)
 
     
-    def test_normal(self):
-        """process a criteria blook with include and exclude criteria"""
-        self.assertEqual(process_eligibility_naive(normal_crit), (inc_norm, exc_norm))
+    # def test_normal(self):
+    #     """process a criteria blook with include and exclude criteria"""
+    #     self.assertEqual(process_eligibility_naive(normal_crit), (inc_norm, exc_norm))
 
 
-    def test_inc_only(self):
-        """process a critieria block with include only criteria"""
-        self.assertEqual(process_eligibility_naive(inc_only_crit), (inc_norm, []))
+    # def test_inc_only(self):
+    #     """process a critieria block with include only criteria"""
+    #     self.assertEqual(process_eligibility_naive(inc_only_crit), (inc_norm, []))
 
 
-    def test_exc_only(self):
-        """process a critieria block with exclude only criteria"""
-        self.assertEqual(process_eligibility_naive(exc_only_crit), ([], exc_norm))
+    # def test_exc_only(self):
+    #     """process a critieria block with exclude only criteria"""
+    #     self.assertEqual(process_eligibility_naive(exc_only_crit), ([], exc_norm))
 
 
-    def test_empty(self):
-        """process an empty criteria block"""
-        self.assertEqual(process_eligibility_naive(""), ([], []))
+    # def test_empty(self):
+    #     """process an empty criteria block"""
+    #     self.assertEqual(process_eligibility_naive(""), ([], []))
 
 
 

@@ -7,14 +7,14 @@ with open("README.md", "r") as fh:
 
 
 setuptools.setup(
-    name="clinproc",
-    version="0.2.4",
+    name="ctproc",
+    version="0.0.1",
     author="James Kelly",
     author_email="mrkellyjam@gmail.com",
     description="library for processing clinical trials data from clinicaltrials.gov",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/semajyllek/clinproc", 
+    url="https://github.com/semajyllek/ctproc", 
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
@@ -26,8 +26,6 @@ setuptools.setup(
         'spacy == 3.0.1',
          'scispacy',
          'negspacy', 
-         'scipy', 
-         'matplotlib', 
-         'pandas'
+         'scipy'
     ],
 )

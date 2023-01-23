@@ -1,7 +1,7 @@
 
 import re
-from clinproc.utils import clean_sentences, check_sentences
-from clinproc.regex_patterns import INC_ONLY_PATTERN, EXC_ONLY_PATTERN, BOTH_INC_AND_EXC_PATTERN
+from ctproc.utils import clean_sentences
+from ctproc.regex_patterns import INC_ONLY_PATTERN, EXC_ONLY_PATTERN, BOTH_INC_AND_EXC_PATTERN
 
 
 #----------------------------------------------------------------#
@@ -52,7 +52,7 @@ def process_eligibility(elig_text):
 
 def process_eligibility_naive(elig_text):
     """
-    elig_text:    a block of raw text like -
+    elig_text:    a block of raw text like this example:
 
       Inclusion Criteria:
 
@@ -73,20 +73,19 @@ def process_eligibility_naive(elig_text):
     gets the sentences, cleans them, checks them for whether they contain 
     any information once extracted and cleaned, in which case they will be removed.
 
-
-
     """
     inc_crit, exc_crit = [], []
     for h, chunk in enumerate(re.split(r'(?:[Ee]xclu(?:de|sion))|(?:[Ii]neligibility) [Cc]riteria:?', elig_text)):
-      for s in re.split(r'\n *(?:\d+\.)|(?:\-) ', chunk):
-        if h == 0:
-          inc_crit.append(s)
-        else:
-          exc_crit.append(s)
-    
-    clean_inc = clean_sentences(inc_crit)
-    clean_exc = clean_sentences(exc_crit)
-    return check_sentences(clean_inc), check_sentences(clean_exc)
+      for s in re.split(r'\n\n', chunk): 
+        for ss in re.split(r'- ', s):
+          ss = re.sub(r'\n   +', ' ', ss).strip()
+          if len(ss) > 0:
+            if h == 0:
+              inc_crit.append(ss)
+            else:
+              exc_crit.append(ss)
+      
+    return clean_sentences(inc_crit), clean_sentences(exc_crit)
 
 
 

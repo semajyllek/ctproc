@@ -5,9 +5,9 @@ import re
 import json
 from lxml import etree
 from pathlib import Path
-from typing import List, Optional, Set, Any
+from typing import Generator, List, Optional, Set, Any
 
-from clinproc.regex_patterns import AGE_PATTERN, EMPTY_PATTERN
+from ctproc.regex_patterns import AGE_PATTERN, EMPTY_PATTERN
 
 
 logger = logging.getLogger(__file__)
@@ -64,27 +64,45 @@ def filter_words(text: str, remove_words: Set[str]):
   return ' '.join(new_contents)
 
 
-def clean_sentences(sent_list: List[str]):
-  """
-  sent_list:   list of sentence strings
-  desc:        removes a bunch of large spaces and newline characters from the text 
-  """
-  return [re.sub(r"  +", " ", re.sub(r"[\n\r]", "", s)).strip() for s in sent_list]
-  
 
-def check_sentences(sents, words_to_remove=REMOVE_WORDS):
+def check_sentence(sent: str, words_to_remove=REMOVE_WORDS) -> Generator[None, None, str]:
   """
   sents:   a list of strings (not tokenized) representing sentences
   desc:    removes sentences that don't contain any actual criteria
   returns: a list of sentences without filler information (not necessarily one criteria per sent however)
   """
   #include_pattern = re.compile(".*(?:(?:(?:[Ee]|[Ii])(?:(?:x|n)(?:clu(?:(?:de)|(?:sion))))|(?:(?:ne)?ligibility))(?: criteria)? (.*)")
+  crit = ' '.join([w.strip(",.")for w in sent.split() if (w.lower().strip(":-,") not in words_to_remove)])
+  if len(crit) > 2:
+    yield crit
+
+
+def clean_sentences(sent_list: List[str]):
+  """
+  sent_list:   list of sentence strings
+  desc:        removes a bunch of large spaces and newline characters from the text 
+  """
   new_sents = []
-  for sent in sents:
-    crit = ' '.join([w for w in sent.split() if (w.lower().strip('\:') not in words_to_remove)])
-    if len(crit) > 2:
-      new_sents.append(crit)
+  for sent in sent_list:
+    for s in re.split(r"- ", sent):
+      for ns in check_sentence(s):
+        new_sents.append(ns)
   return new_sents
+  
+
+# def check_sentences(sents, words_to_remove=REMOVE_WORDS):
+#   """
+#   sents:   a list of strings (not tokenized) representing sentences
+#   desc:    removes sentences that don't contain any actual criteria
+#   returns: a list of sentences without filler information (not necessarily one criteria per sent however)
+#   """
+#   #include_pattern = re.compile(".*(?:(?:(?:[Ee]|[Ii])(?:(?:x|n)(?:clu(?:(?:de)|(?:sion))))|(?:(?:ne)?ligibility))(?: criteria)? (.*)")
+#   new_sents = []
+#   for sent in sents:
+#     crit = ' '.join([w for w in sent.split() if (w.lower().strip(':-') not in words_to_remove)])
+#     if len(crit) > 2:
+#       new_sents.append(crit)
+#   return new_sents
 
 
 

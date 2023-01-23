@@ -16,11 +16,11 @@ from typing import Any, Dict, Generator, List, Optional, Set, Tuple
 
 
 
-from clinproc.ctconfig import CTConfig
-from clinproc.regex_patterns import EMPTY_PATTERN
-from clinproc.ctdocument import CTDocument, EligCrit
-from clinproc.eligibility import process_eligibility_naive
-from clinproc.utils import print_crit, filter_words, DONT_ALIAS
+from ctproc.ctconfig import CTConfig
+from ctproc.regex_patterns import EMPTY_PATTERN
+from ctproc.ctdocument import CTDocument, EligCrit
+from ctproc.eligibility import process_eligibility_naive
+from ctproc.utils import print_crit, filter_words, DONT_ALIAS
 
 
 
@@ -37,7 +37,7 @@ logger = logging.getLogger(__file__)
 # Document Processing API Object
 #----------------------------------------------------------------#
 
-class ClinProc:
+class CTProc:
 
   def __init__(self, ct_config: CTConfig):
     self.config = ct_config
@@ -611,7 +611,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    data = '/Users/jameskelly/Documents/cp/clinproc/clinproc/tests/CT_test_folder.zip'
+    data = '/Users/jameskelly/Documents/cp/ctproc/ctproc/tests/CT_test_folder.zip'
 
     ct_config = CTConfig(
       zip_data=args.zip_data, 
@@ -627,7 +627,7 @@ if __name__ == "__main__":
       get_only=args.get_only
     )
 
-    cp = ClinProc(ct_config)
+    cp = CTProc(ct_config)
     for d in cp.process_data():
       print(d.__dict__)
       break
