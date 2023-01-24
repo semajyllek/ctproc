@@ -1,4 +1,4 @@
-# Process tons of files of the form ClinicalTrials.2021-04-27.part1/NCT0093xxxx/NCT00934219.xml, now on local disk
+# OOP program for processing files of the form ClinicalTrials.2021-04-27.part1/NCT0093xxxx/NCT00934219.xml
 
 
 import logging
@@ -20,13 +20,13 @@ from ctproc.ctconfig import CTConfig
 from ctproc.regex_patterns import EMPTY_PATTERN
 from ctproc.ctdocument import CTDocument, EligCrit
 from ctproc.eligibility import process_eligibility_naive
-from ctproc.utils import print_crit, filter_words, DONT_ALIAS
+from ctproc.utils import alias_map, print_crit, filter_words, DONT_ALIAS
 
 
 
-
+logging.basicConfig()
 logger = logging.getLogger(__file__)
-
+logger.setLevel('INFO')
 
 
 
@@ -43,22 +43,33 @@ class CTProc:
     self.config = ct_config
     if ct_config.add_nlp:
       self.add_nlp()
+    else:
+      nlp_flags = self.check_nlp_configs()
+      if len(nlp_flags) > 0:
+        logger.warning(f"these config flags are set as True, but will be ignored since add_nlp is False in self.config: \n{nlp_flags}")
 
+
+  def check_nlp_configs(self) -> Set[str]:
+    # user friendly func to warn about ignored flags if add_nlp is False in self.config
+    # config args: remove_stops, add_ents, move_negations, expand
+    config_flags = set()
+    if self.config.add_ents:
+      config_flags.add('add_ents')
+    if self.config.remove_stops:
+      config_flags.add('remove_stops')
+    if self.config.move_negations:
+      config_flags.add('move_negations')
+    if self.config.expand:
+      config_flags.add('expand')
+    return config_flags
 
   def add_nlp(self):
     #np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning) 
-
-    # this requires the package to be installed!
-    try:
-      self.NLP = spacy.load("en_core_sci_md")
-    except RuntimeError:
-      logger.error("you must install en_core_sci_md separately to use the add_nlp features, i.e.: pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_md-0.4.0.tar.gz")
-
+    self.NLP = spacy.load("en_core_sci_md")  # throws runtime error if not installed
     self.NLP.add_pipe("scispacy_linker", config={"resolve_abbreviations": True, "linker_name": "umls"})
     self.NLP.add_pipe("negex")
     self.linker = self.NLP.get_pipe("scispacy_linker")
     self.STOP_WORDS = self.NLP.Defaults.stop_words
-
 
 
 
@@ -69,57 +80,39 @@ class CTProc:
     returns:    yields processed CTDocuments one at a time
     """
 
-    with ZipFile(self.config.zip_data, 'r') as zip:
-      i = 0
+    with ZipFile(self.config.zip_data, 'r') as zip_reader:
       with open(self.config.write_file, "w") as outfile:
-        for ct_file in tqdm(zip.namelist()):
-          if ct_file.endswith('xml') and (i < self.config.max_trials) and (i > self.config.start):
-            print(f"ct file being processed: {ct_file}")
-            if (self.config.get_only is not None) and (Path(ct_file).name[:-4] not in self.config.get_only):
-              continue 
-            result_doc = self.process_ct_file(zip.open(ct_file, 'r'), self.config.id_to_print)
-            if result_doc.elig_crit is None:
-              print("no eligibility crit!!!")
-              continue
+        for i, ct_file in enumerate(tqdm(zip_reader.namelist())):
+          if not self.iter_check(i):
+            continue 
 
-            if result_doc is not None:
-              if self.config.concat:
-                result_doc.concatenate_data()
-              
-              result_doc.make_content_field()
+          result_doc = self.build_doc(ct_file, zip_reader)
+          if result_doc is None:
+            continue
 
-              if self.config.add_nlp:
-                if self.config.remove_stops:
-                  result_doc = self.filter_crit(result_doc, words_to_remove=self.STOP_WORDS)
+          result_doc = self.transform_doc(result_doc)
+    
+          if self.config.save_data:
+            json.dump(result_doc, outfile, default= lambda o: o.__dict__)
+            outfile.write("\n")
 
-                if self.config.add_ents:
-                  result_doc = self.add_entities(result_doc)
+          yield result_doc
 
-                #if self.add_aliases:
+  #----------------------------------------------------------------------------------------------------#
+  # methods for building docs per config from ct_file and current iterator, with all combined checks
+  #----------------------------------------------------------------------------------------------------#
+   
+  def build_doc(self, ct_file: str, zip_reader) -> Optional[CTDocument]:
+    if not self.combined_predoc_check(ct_file):
+      return None
+      
+    logger.info(f"ct file being processed: {ct_file}, doc being created")
+    result_doc = self.process_ct_file(zip_reader.open(ct_file, 'r'), self.config.id_to_print)
+    if not self.combined_doc_check(result_doc):
+      return None
+    return result_doc
 
-                  
-                if self.config.move_negations:
-                  result_doc, _ = self.move_doc_negs(result_doc)
-
-
-              if self.config.save_data:
-                json.dump(result_doc, outfile, default= lambda o: o.__dict__)
-                outfile.write("\n")
-
-              yield result_doc
-
-          i += 1
-            
-    logger.info(f"Total nunmber of trials documents processed: {i}")
-
-
-
-
-  #----------------------------------------------------------------------------------------------#
-  # methods for getting initial data into CTDocument forms according to preferences in CTConfig
-  #----------------------------------------------------------------------------------------------#
-
-
+  
   def process_ct_file(self, xml_filereader, id_to_print: Optional[str]):
     """
     xml_filereader:  specific type of object passed from process_data(),
@@ -143,7 +136,7 @@ class CTProc:
 
     docid = root.find('id_info/nct_id').text
     if docid == id_to_print:
-      print(etree.tostring(root, pretty_print=True, encoding='unicode'))
+      logger.info(etree.tostring(root, pretty_print=True, encoding='unicode'))
 
     ct_doc = CTDocument(nct_id=docid)
     ct_doc.condition = [result.text for result in root.findall('condition')]
@@ -157,10 +150,9 @@ class CTProc:
                       
     ct_doc.process_doc_age(root) 
 
-
-    # other fields... required_fields[field] = clean_sentences([field_val])[0]
     return ct_doc
 
+  
   
   def get_eligibility(self, ct_doc: CTDocument, xml_root: etree.ElementTree) -> CTDocument:
     field_val = xml_root.find('eligibility/criteria/textblock')
@@ -180,12 +172,94 @@ class CTProc:
     return ct_doc 
 
 
+  #----------------------------------------------------------------#
+  # checks 
+  #----------------------------------------------------------------#
+ 
+  # first check 
+  def iter_check(self, iter: int) -> bool:
+    if iter < self.config.max_trials:
+      if iter >= self.config.start:
+        return True
+    return False
+
+
+  # checks that occur prior to document creation
+  def combined_predoc_check(self, ct_file: str) -> bool:
+    if not (self.file_check(ct_file) and self.id_check(ct_file)):
+      return False
+    return True
+
+  def file_check(self, ct_file: str) -> bool:
+    if not ct_file.endswith('xml'):
+      return False
+    return True
+
+  def id_check(self, ct_file: str) -> bool:
+    nct_id = Path(ct_file).name[:-4]    
+    if (self.config.get_only is not None) and (nct_id not in self.config.get_only):
+      return False
+      
+    if nct_id in self.config.skip_ids:
+      return False
+    return True
+
+
+  # checks that occur during creation of doc  
+  def combined_doc_check(self, doc: Optional[CTDocument]) -> bool:
+    return self.existence_check(doc) or self.elig_check(doc)
+
+  def existence_check(self, doc: Optional[CTDocument]) -> bool:
+    if doc is None:
+      return False
+    return True
+
+  def elig_check(self, doc: CTDocument) -> bool:
+    if doc.elig_crit is None:
+      logger.info("no eligibility crit!!!")
+      return False
+    return True
+
+  
+  
+  #----------------------------------------------------------------#
+  # methods for transforming the documents and/or adding features
+  #----------------------------------------------------------------#
+  
+  def transform_doc(self, doc: CTDocument) -> CTDocument:
+    if self.config.concat:
+      doc.concatenate_data()
+
+    if self.config.add_nlp:
+      doc = self.add_nlp_features(doc)
+    
+    return doc
+
+
+  def add_nlp_features(self, doc: CTDocument) -> CTDocument:
+    if self.config.remove_stops:
+      doc = self.filter_crit(doc, words_to_remove=self.STOP_WORDS)
+    
+    if self.config.add_ents:
+      doc = self.add_entities(doc)
+      
+    if self.config.expand:
+      doc = self.expand_with_aliases(doc)
+     
+    if self.config.move_negations:
+      doc, _ = self.move_doc_negs(doc)
+    
+    return doc
+
+
+
+
 
   #----------------------------------------------------------------#
   # Getting CUI expansions (entities)
   #----------------------------------------------------------------#
 
-  def get_ents(self, sent_list: List[str], top_N: int = 2) -> List[Dict[str, str]]:
+  def get_ents(self, sent_list: List[str]) -> List[Dict[str, str]]:
     """
     sent_list: list of sentence strings
     top_N:     int directing how many aliaseed terms to get
@@ -206,7 +280,7 @@ class CTProc:
           new_ent['end'] = ent.end_char
           new_ent['cui'] = {'val':umls_ent[0], 'score':umls_ent[1]}
           aliases = self.linker.kb.cui_to_entity[umls_ent[0]]._asdict()['aliases']
-          new_ent['alias_expansion'] = aliases[:min(len(aliases), top_N)]
+          new_ent['alias_expansion'] = aliases[:min(len(aliases), self.config.max_ents)]
           new_ent["negation"] = ent._.negex
           #new_ent['covered_text'] = linker.kb.cui_to_entity[umls_ent[0]]
           new_ents.append(new_ent)
@@ -218,12 +292,12 @@ class CTProc:
 
 
 
-  def add_entities(self, ct_doc, top_N=2) -> CTDocument:
+  def add_entities(self, ct_doc) -> CTDocument:
     """
     desc:    helper function to add the entities got from get_entities() to the doc
     """
-    ct_doc.inc_ents = self.get_ents(ct_doc.elig_crit.include_criteria, top_N)
-    ct_doc.exc_ents = self.get_ents(ct_doc.elig_crit.exclude_criteria, top_N)
+    ct_doc.inc_ents = self.get_ents(ct_doc.elig_crit.include_criteria)
+    ct_doc.exc_ents = self.get_ents(ct_doc.elig_crit.exclude_criteria)
     return ct_doc
 
 
@@ -234,9 +308,9 @@ class CTProc:
   # methods for getting representations of eligibility criteria where aliases have been added
   #----------------------------------------------------------------------------------------------#
 
-  def move_aliases(self, ct_doc: CTDocument, field_type: str, dont_alias=DONT_ALIAS):
+  def expand_with_aliases(self, ct_doc: CTDocument, field_type: str = 'include', dont_alias=DONT_ALIAS):
     """
-    doc:            a dict containing clinical trial data
+    ct_doc:         a CTDocument containing clinical trial data
     field_type:     exclude, include, topic are the 3 expected values for this 
     dont_alias:     globally defined set of terms to not be aliased for noticable
                     domain errors, e.g. the term ER, included in many documents,
@@ -255,9 +329,10 @@ class CTProc:
 
     """
 
-    crit_field, ent_field, alias_field = self.alias_map(field_type)
+    crit_field, ent_field, alias_field = alias_map(field_type)
     crits = self.get_elig_crits(ct_doc.elig_crit, crit_field)
     ents = ct_doc.inc_ents if (ent_field == 'inc_ents') else ct_doc.exc_ents
+    
     for _, (ent_sent, crit) in enumerate(zip(ents, crits)):
       new_crit = crit
       added = 0
@@ -272,6 +347,7 @@ class CTProc:
         begin, end = self.get_ent_begin_and_end(new_crit, ent, added)
         new_aliases = self.handle_right_alias_end(end, new_aliases)
         add_part = ' '.join(new_aliases)   
+        
         if len(add_part) > 0:
           add_part = add_part + ' '     
 
@@ -280,7 +356,7 @@ class CTProc:
         added += add_len    
 
       if field_type == "topic":
-        ct_doc.elig_crit.__dict__[alias_field].append(new_crit.strip())
+        ct_doc.elig_crit.__dict__[crit_field].append(new_crit.strip())
       else:
         ct_doc.aliased_crits[alias_field].append(new_crit)
 

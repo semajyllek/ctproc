@@ -27,7 +27,7 @@ class CTDocument:
     def __init__(self, nct_id: str):
         self.nct_id: str = nct_id 
     
-        self.aliased_crits: Optional[Dict[str, str]] = None
+        self.aliased_crits: Dict[str, List[str]] = {'inc_alias_crits':[], 'exc_alias_crits':[]}
         self.aliased_sents: List[str] = []
         self.brief_summary: Optional[str] = None
         self.brief_title: str = None 

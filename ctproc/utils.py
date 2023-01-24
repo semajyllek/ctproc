@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Generator, List, Optional, Set, Any
 
 from ctproc.regex_patterns import AGE_PATTERN, EMPTY_PATTERN
+from ctproc.skip_crit import SKIP_CRIT
 
 
 logger = logging.getLogger(__file__)
@@ -60,21 +61,40 @@ def filter_words(text: str, remove_words: Set[str]):
   text:         str of text to be filtered
   remove_words: set of words to remove
   """
-  new_contents = [word for word in text.split() if word not in remove_words]
-  return ' '.join(new_contents)
+  return ' '.join([word for word in text.split() if word not in remove_words])
 
 
 
-def check_sentence(sent: str, words_to_remove=REMOVE_WORDS) -> Generator[None, None, str]:
+
+def check_word(word: str, words_to_remove: Set[str] = REMOVE_WORDS) -> bool:
+  w = word.strip(":-,") 
+
+  # ex. DISEASE
+  if re.match(r'[A-Z][A-Z][A-Z][A-Z][A-Z][A-Z]+(?: [A-Z]+)?', w):
+    return False
+
+  if w.lower() in words_to_remove:
+    return False
+
+  return True
+
+  
+
+def fix_sentence(sent: str) -> str:
   """
   sents:   a list of strings (not tokenized) representing sentences
   desc:    removes sentences that don't contain any actual criteria
   returns: a list of sentences without filler information (not necessarily one criteria per sent however)
   """
   #include_pattern = re.compile(".*(?:(?:(?:[Ee]|[Ii])(?:(?:x|n)(?:clu(?:(?:de)|(?:sion))))|(?:(?:ne)?ligibility))(?: criteria)? (.*)")
-  crit = ' '.join([w.strip(",.")for w in sent.split() if (w.lower().strip(":-,") not in words_to_remove)])
-  if len(crit) > 2:
-    yield crit
+  return ' '.join([w for w in sent.split() if check_word(w)]).strip('.,;:')
+ 
+
+def remove_leading_number(s: str) -> str:
+  m = re.match(r'\d+. *(?P<crit>.*)', s)
+  if m is not None:
+    s = m['crit']
+  return s
 
 
 def clean_sentences(sent_list: List[str]):
@@ -85,26 +105,13 @@ def clean_sentences(sent_list: List[str]):
   new_sents = []
   for sent in sent_list:
     for s in re.split(r"- ", sent):
-      for ns in check_sentence(s):
-        new_sents.append(ns)
+      s = fix_sentence(s)
+      s = remove_leading_number(s)
+      if len(s) > 2 and s not in SKIP_CRIT:
+        new_sents.append(s)
+
   return new_sents
   
-
-# def check_sentences(sents, words_to_remove=REMOVE_WORDS):
-#   """
-#   sents:   a list of strings (not tokenized) representing sentences
-#   desc:    removes sentences that don't contain any actual criteria
-#   returns: a list of sentences without filler information (not necessarily one criteria per sent however)
-#   """
-#   #include_pattern = re.compile(".*(?:(?:(?:[Ee]|[Ii])(?:(?:x|n)(?:clu(?:(?:de)|(?:sion))))|(?:(?:ne)?ligibility))(?: criteria)? (.*)")
-#   new_sents = []
-#   for sent in sents:
-#     crit = ' '.join([w for w in sent.split() if (w.lower().strip(':-') not in words_to_remove)])
-#     if len(crit) > 2:
-#       new_sents.append(crit)
-#   return new_sents
-
-
 
 
 # -------------------------------------------------------------------------------------- #
