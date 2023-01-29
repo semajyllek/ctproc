@@ -624,7 +624,7 @@ class EligProcTestCase(unittest.TestCase):
       self.maxDiff = None
       id_ = 'NCT02221141'
      
-      cp = CTProc(CTConfig(test_folder_path, max_trials=500, get_only={id_}))
+      cp = CTProc(CTConfig(test_folder_path, max_trials=50, get_only={id_}))
       id2doc = {res.nct_id : res for res in cp.process_data()}
       id_doc = id2doc[id_] 
 

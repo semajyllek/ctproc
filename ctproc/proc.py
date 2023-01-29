@@ -83,6 +83,7 @@ class CTProc:
     with ZipFile(self.config.zip_data, 'r') as zip_reader:
       with open(self.config.write_file, "w") as outfile:
         for i, ct_file in enumerate(tqdm(zip_reader.namelist())):
+
           if not self.iter_check(i):
             continue 
 

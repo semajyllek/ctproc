@@ -44,11 +44,6 @@ def get_processed_docs(proc_loc):
 
   return [json.loads(json_str) for json_str in json_list]
 
- 
-
-
-
-
 
 
 # -------------------------------------------------------------------------------------- #
@@ -117,8 +112,6 @@ def clean_sentences(sent_list: List[str]):
 # -------------------------------------------------------------------------------------- #
 # age processing utils
 # -------------------------------------------------------------------------------------- #
-
-
 
 def convert_age_to_year(age, units):
   """

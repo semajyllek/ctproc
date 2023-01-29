@@ -25,7 +25,7 @@ class CTConfig(NamedTuple):
   make_content: 
 
   """
-  zip_data: Path
+  zip_data: str
   id_to_print: Optional[str] = None
   add_nlp: bool = False
   write_file: Path = 'ct_output.txt'
