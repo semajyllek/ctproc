@@ -26,7 +26,7 @@ from ctproc.utils import alias_map, print_crit, filter_words, DONT_ALIAS
 
 logging.basicConfig()
 logger = logging.getLogger(__file__)
-logger.setLevel('WARNING')
+logger.setLevel('INFO')
 
 
 
