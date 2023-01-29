@@ -98,6 +98,10 @@ class CTProc:
 
           yield result_doc
 
+
+
+
+
   #----------------------------------------------------------------------------------------------------#
   # methods for building docs per config from ct_file and current iterator, with all combined checks
   #----------------------------------------------------------------------------------------------------#
@@ -624,11 +628,6 @@ class CTProc:
         json.dump(doc._asdict(), wf)
         wf.write('\n')
     return new_docs
-
-
-
-
-
 
 
 

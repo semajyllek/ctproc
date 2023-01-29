@@ -7,7 +7,7 @@ from lxml import etree
 from typing import Dict, List, Optional, Set, Union
 
 from ctproc.regex_patterns import AGE_PATTERN
-from ctproc.utils import get_str_or_none, data_to_str, process_age_field, filter_words
+from ctproc.utils import get_str_or_none, data_to_str, convert_age_to_year, filter_words
 
 logger = logging.getLogger(__file__)
 
@@ -112,7 +112,21 @@ class CTDocument:
             self.move_aliases("exclude")
 
 
- 
+        
+    def process_age_field(self, field_val) -> Optional[str]:
+        """
+        desc: helper to call concvert_age_to_year.
+                extracts unit and value from passed string taken from age field of doc 
+        """
+        age_match = AGE_PATTERN.match(field_val)
+        if age_match is not None:
+            age = float(age_match.group('age'))
+            units = age_match.group('units')
+            return convert_age_to_year(age, units)
+        else:
+            return None
+
+
 
     def process_doc_age(self, xml_root: etree.ElementTree) -> None:
         min_age = self.process_doc_age_helper(xml_root, 'eligibility/minimum_age') 
@@ -128,7 +142,7 @@ class CTDocument:
         if field_val is None:
             logger.info("no age field exists for this document")
             return None
-        age =  process_age_field(field_val.text)
+        age =  self.process_age_field(field_val.text)
         return age
        
 

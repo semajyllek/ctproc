@@ -119,20 +119,6 @@ def clean_sentences(sent_list: List[str]):
 # -------------------------------------------------------------------------------------- #
 
 
-def process_age_field(field_val):
-  """
-  desc: helper to call concvert_age_to_year.
-        extracts unit and value from passed string taken from age field of doc 
-  """
-  age_match = AGE_PATTERN.match(field_val)
-  if age_match is not None:
-    age = float(age_match.group('age'))
-    units = age_match.group('units')
-    return convert_age_to_year(age, units)
-  else:
-    return None
-
-
 
 def convert_age_to_year(age, units):
   """
