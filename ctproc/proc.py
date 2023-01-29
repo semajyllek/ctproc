@@ -212,7 +212,7 @@ class CTProc:
 
   # checks that occur during creation of doc  
   def combined_doc_check(self, doc: Optional[CTDocument]) -> bool:
-    return self.existence_check(doc) or self.elig_check(doc)
+    return self.existence_check(doc) and self.elig_check(doc)
 
   def existence_check(self, doc: Optional[CTDocument]) -> bool:
     if doc is None:
