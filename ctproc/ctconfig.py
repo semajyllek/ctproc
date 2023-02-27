@@ -4,7 +4,8 @@ from pathlib import Path
 
 class CTConfig(NamedTuple):
   """
-  zip_data:          str or path ending with .zip containing ct xml files (zipped)
+  data_path:         str or path ending with .zip containing ct xml files (zipped)
+                     OR ending with .xml in the case of a path to topics
   id_to_print:       str, for debugging, prints doc containing the id given 
   add_nlp:           bool as to whether to load the en_core_sci_md model and possibly add transformed features,
                      depending on which of the "nlp" args are set,  namely {remove_stops, add_ents, move_negations, expand}
@@ -25,25 +26,25 @@ class CTConfig(NamedTuple):
   make_content: 
 
   """
-  zip_data: str
+  data_path: Path
   id_to_print: Optional[str] = None
-  add_nlp: bool = False
-  write_file: Path = 'ct_output.txt'
+  nlp: bool = False
+  write_file: Path = Path('ct_output.txt')
   max_trials: float = 1e7
   start: int = -1
   get_only: Optional[Set[str]] = None
   skip_ids: Set[str] = set()
+  disable_tqdm: bool = False
 
   # nlp configs
   remove_stops: bool = True
   add_ents: bool = True
-  max_ents: int = 2
+  max_aliases: int = 2
   move_negations: bool = True
   expand: bool = False
   
   concat: bool = False
-  save_data: bool = True
-
+  is_topic: bool = False
 
 
 

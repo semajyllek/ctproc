@@ -13,11 +13,7 @@ from ctproc.skip_crit import SKIP_CRIT
 
 logger = logging.getLogger(__file__)
 
-DONT_ALIAS = {"yo", "girl", "boy", "er", "changes", "patient", "male", "female", "age"}
 REMOVE_WORDS = ["criteria", "include", "exclude", "inclusion", "exclusion", "eligibility"]
-
-
-
 
 
 # -------------------------------------------------------------------------------------- #
@@ -175,36 +171,6 @@ def data_to_str(data, contents_ignore_fields, grab_only_fields):
   return c
 
 
-
-
-
-
-# -------------------------------------------------------------------------------------- #
-# ct structuring utils
-# -------------------------------------------------------------------------------------- #
-
-
-def alias_map(field_type):
-  """
-  field_type: str for directing key names, depending on include, exclude, or topics
-  desc:       returns the appropriate field names for the alias creating process
-
-  """
-  if field_type == "include":
-    crit_field = "include_criteria"
-    ent_field = "inc_ents"
-    alias_field = "inc_alias_crits"
-  elif field_type == "exclude":
-    crit_field = "exclude_criteria"
-    ent_field = "exc_ents"
-    alias_field = "exc_alias_crits"
-  else:
-    crit_field = "sents"
-    ent_field = "ents"
-    alias_field = "aliased_sents"
-  return crit_field, ent_field, alias_field
-
-  
 
 # -------------------------------------------------------------------------------------- #
 # print utils

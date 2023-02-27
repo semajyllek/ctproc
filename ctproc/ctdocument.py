@@ -3,13 +3,16 @@ import logging
 
 import re
 import json
-from lxml import etree
-from typing import Dict, List, Optional, Set, Union
+from xml import etree
+from typing import Any, Dict, Generator, List, NamedTuple, Optional, Set, Union
 
+from ctproc.ctconfig import CTConfig
+from ctproc.ctbase import CTBase, NLPTools
 from ctproc.regex_patterns import AGE_PATTERN
 from ctproc.utils import get_str_or_none, data_to_str, convert_age_to_year, filter_words
 
 logger = logging.getLogger(__file__)
+
 
 
 class EligCrit:
@@ -17,18 +20,18 @@ class EligCrit:
         self.raw_text: str = raw_text
         self.include_criteria: List[str] = []
         self.exclude_criteria: List[str] = []
+        self.inc_aliased_crit: List[str] = []
+        self.exc_aliased_crit: List[str] = []
 
     def __str__(self) -> str:
         return repr(f"raw_text:\n{self.raw_text}\ninclude_criteria:\n{self.include_criteria}\nexclude_criteria:\n{self.exclude_criteria}\n")
     
 
 
-class CTDocument:
-    def __init__(self, nct_id: str):
-        self.nct_id: str = nct_id 
-    
-        self.aliased_crits: Dict[str, List[str]] = {'inc_alias_crits':[], 'exc_alias_crits':[]}
-        self.aliased_sents: List[str] = []
+class CTDocument(CTBase):
+    def __init__(self, nct_id: str, nlp_tools: Optional[NLPTools] = None):
+        super().__init__(id=nct_id, nlp_tools=nlp_tools)
+
         self.brief_summary: Optional[str] = None
         self.brief_title: str = None 
         self.condition: Optional[str] = None
@@ -41,12 +44,8 @@ class CTDocument:
         self.elig_min_age: float = 0. 
         self.intervention_browse_mesh_term: Optional[str] = None
         self.intervention_name: Optional[str] = None
-        self.intervention_type: Optional[str] = None
-        self.moved_negations: Optional[str] = None
+        self.intervention_type: Optional[str] = None 
 
-    
-
-        
 
     def filter_crit(self, words_to_remove: Set[str]) -> None:
         """
@@ -73,6 +72,17 @@ class CTDocument:
 
 
 
+    def concat_check(self, field: str, ignore_fields: List[str], grab_only_fields: List[str]) -> bool:
+        if len(grab_only_fields) != 0:
+            if field in grab_only_fields:
+                return True
+            return False
+                 
+        if field not in ignore_fields:
+            return True
+        return False
+
+                    
     def concatenate_data(self, ignore_fields = [], grab_only_fields = [], lower=False) -> None:
         """
         results:  dictionary of string key, string, list, or dict values
@@ -80,36 +90,35 @@ class CTDocument:
                   but all other values get concatenated into a single string value 
                   for 'contents' 
         """
-        new_results = {'id':None, 'contents':None}
         contents = ""
         for field, value in self._asdict().items():
-            if field == 'id':
-                new_results['id'] = value
-            else:
-                if len(grab_only_fields) != 0:
-                    if field in grab_only_fields:
-                        contents += data_to_str(value, ignore_fields, grab_only_fields)
-                    
-                    elif (field not in ignore_fields):
-                        contents += data_to_str(value, ignore_fields, grab_only_fields)
-            
-        contents = contents.strip() if not lower else contents.strip().lower()
+            if self.concat_check(field, ignore_fields, grab_only_fields):
+                contents += data_to_str(value, ignore_fields, grab_only_fields).strip()
+
+        if lower:
+            contents.lower()
+
         self.contents = re.sub('    ', ' ', contents)
         
 
-    def move_negs(self):
-        self.move_neg(inc_or_exc="inc")
-        self.move_neg(inc_or_exc="exc")
+    def expand_with_aliases(self):
+        """
+		desc:           uses entities and location from the spaCy pipeline process,
+						with linked UMLS (CUI) terms, and there associated raw text forms
+						it iserts these values into the sentence in the position where
+						the entity is located, preserving the sentence except for the new
+						semantic redundancy. syntactic redundancy is not avoided, as many terms 
+						share value with other aliases, or the portion of the sentence being considered 
+						(entities can span multiple tokens), except in the case where these 
+						(possibly near) identical values are adjacent, in which case the last term of the 
+						inserted material will be dropped before inserting. 
+						**if max_ents > 1 this creates longer expanded sentences**
 
-    
-    def entity_expand(self) -> None:
-        if self.config.mnegs:
-            self.move_negs()
+		"""
         
-        
-        if self.config.expand:
-            self.move_aliases("include")
-            self.move_aliases("exclude")
+        self.elig_crit.inc_aliased_crit = [self.get_aliased_text(text_sent, ent_sent) for (text_sent, ent_sent) in zip(self.elig_crit.include_criteria, self.inc_ents)]
+        self.elig_crit.exc_aliased_crit = [self.get_aliased_text(text_sent, ent_sent) for (text_sent, ent_sent) in zip(self.elig_crit.exclude_criteria, self.exc_ents)]
+
 
 
         
@@ -137,13 +146,46 @@ class CTDocument:
         if max_age is not None:
             self.elig_max_age = max_age
     
+
     def process_doc_age_helper(self, xml_root: etree.ElementTree, age_field: str) -> None:
         field_val = xml_root.find(age_field)
         if field_val is None:
             logger.info("no age field exists for this document")
             return None
-        age =  self.process_age_field(field_val.text)
+        age = self.process_age_field(field_val.text)
         return age
        
 
+    def get_filtered_doc_as_dict(self) -> Dict[str, str]:
+        """
+        desc:    creates smaller, filtered versions of the documents for
+                 some other types of uses
+        """
+        filtered = {}
+        filtered['nct_id'] = self.nct_id
+        filtered['min_age'] = self.elig_min_age
+        filtered['max_age'] = self.elig_max_age
+        filtered['gender'] = self.elig_gender
+        filtered['include_cuis'] = ' '.join([ent['cui']['val'] for ent in self.inc_ents])
+        filtered['exclude_cuis'] = ' '.join([ent['cui']['val'] for ent in self.exc_ents])
+        return filtered 
+
+
+
+    def add_nlp_features(self, config: CTConfig) -> None:
+        if config.remove_stops:
+            self.inc_filtered = [filter_words(sent, self.nlp_tools.STOP_WORDS) for sent in self.elig_crit.include_criteria]
+            self.exc_filtered = [filter_words(sent, self.nlp_tools.STOP_WORDS) for sent in self.elig_crit.exclude_criteria]
     
+        if config.add_ents:
+            self.add_doc_ent_sents(config)
+            
+        if config.expand:
+            self.expand_with_aliases()
+
+            
+    def add_doc_ent_sents(self, config: CTConfig) -> None:
+        inc_nlp_sents = [self.nlp_tools.NLP(s) for s in self.elig_crit.include_criteria]
+        exc_nlp_sents = [self.nlp_tools.NLP(s) for s in self.elig_crit.exclude_criteria]
+        self.inc_ents = self.get_ents(inc_nlp_sents, config)
+        self.exc_ents = self.get_ents(exc_nlp_sents, config)
