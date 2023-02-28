@@ -35,7 +35,7 @@ class CTBase:
 	def get_ents(self, nlp_sent: Any, config: CTConfig) -> List[List[CTEntity]]:
 		new_ent_sents = []
 		for sent in nlp_sent:	
-			ent_sent = [self.proc_spacy_ent(ent, config.max_aliases) for ent in sent.ents]
+			ent_sent = [self.proc_spacy_ent(ent, config.max_aliases) for ent in sent.ents if len(ent._.kb_ents) > 0]
 			new_ent_sents.append(ent_sent)
 		
 		return new_ent_sents

@@ -20,11 +20,11 @@ test_doc_folder_path = "/Users/jameskelly/Documents/cp/ctproc/clinicaltrials.gov
 # test optional support for topic processing
 # TODO: uncomment, test_topic_folder_path = Path(__file__).parent.joinpath("ct_test_topic_data.xml").as_posix()
 test_topic_folder_path = "/Users/jameskelly/Documents/cp/ctproc/ctproc/tests/ct_topic_test_data.xml"
-
+trec_topic_folder_path = '/Users/jameskelly/Documents/cp/ctmatch/data/trec_data/trec_22_topics.xml'
 
 class DocProcTestCase(unittest.TestCase):
 
-    
+    #@unittest.skip
     def test_doc_proc_no_nlp(self):
       """
       process a zip file of (possibly) a single document containing the id_ defined in the program
@@ -42,7 +42,7 @@ class DocProcTestCase(unittest.TestCase):
 
 
 
-    @unittest.skip("skip for faster tests")
+    #@unittest.skip("skip for faster tests")
     def test_doc_proc(self):
       """
       process a zip file of a single document containing the id_ defined in the program
@@ -75,6 +75,7 @@ class DocProcTestCase(unittest.TestCase):
 
 class TopicProcTestCase(unittest.TestCase):
     
+    #@unittest.skip
     def test_topic_proc_no_nlp(self):
         topic_config = CTConfig(
             data_path=test_topic_folder_path, 
@@ -90,7 +91,7 @@ class TopicProcTestCase(unittest.TestCase):
 
 
 
-    @unittest.skip("skip for faster tests") 
+    #@unittest.skip("skip for faster tests") 
     def test_topic_proc(self):
         topic_config = CTConfig(
             data_path=test_topic_folder_path, 

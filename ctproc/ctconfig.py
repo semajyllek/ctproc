@@ -18,7 +18,6 @@ class CTConfig(NamedTuple):
   remove_stops:      bool, whether to use spaCy's set of stop words to filter the criteria strings
   add_ents:          bool, whether to get entitites with spaCY over the include, exclude criteria (once extracted)
   ent_max:           int, how many related aliases to get from the entity search
-  move_negations:    bool, whether to move negations from inc to exc criteria or vice versa
   expand:            bool, whether to expand terms in eligibility criteria, makes new alias_crits fields if True
  
   
@@ -40,7 +39,6 @@ class CTConfig(NamedTuple):
   remove_stops: bool = True
   add_ents: bool = True
   max_aliases: int = 2
-  move_negations: bool = True
   expand: bool = False
   
   concat: bool = False

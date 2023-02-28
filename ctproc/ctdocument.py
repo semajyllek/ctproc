@@ -3,7 +3,7 @@ import logging
 
 import re
 import json
-from xml import etree
+from lxml import etree
 from typing import Any, Dict, Generator, List, NamedTuple, Optional, Set, Union
 
 from ctproc.ctconfig import CTConfig
@@ -55,7 +55,7 @@ class CTDocument(CTBase):
         self.exc_filtered = [filter_words(sent, words_to_remove) for sent in self.elig_crit.exclude_criteria]
 
 
-    def get_text_fields(self, xml_root: etree.ElementTree) -> None:
+    def get_text_fields(self, xml_root: etree) -> None:
         self.brief_summary = get_str_or_none("brief_summary/textblock", xml_root)
         self.detailed_description = get_str_or_none("detailed_description/textblock", xml_root)
 
@@ -137,7 +137,7 @@ class CTDocument(CTBase):
 
 
 
-    def process_doc_age(self, xml_root: etree.ElementTree) -> None:
+    def process_doc_age(self, xml_root: etree) -> None:
         min_age = self.process_doc_age_helper(xml_root, 'eligibility/minimum_age') 
         if min_age is not None:
              self.elig_min_age = min_age

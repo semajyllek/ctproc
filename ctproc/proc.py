@@ -8,9 +8,9 @@ import copy
 import json
 import spacy
 from tqdm import tqdm
+from lxml import etree
 from pathlib import Path
 from zipfile import ZipFile
-from xml.etree import ElementTree
 from negspacy.negation import Negex
 from scispacy.linking import EntityLinker 
 from typing import Callable, Dict, Generator, List, NamedTuple, Optional, Set, Tuple, Union
@@ -121,7 +121,7 @@ class CTProc:
     returns:    yields processed CTTopic objects, one at a time
     """
 
-    topic_root = ElementTree.parse(self.config.data_path).getroot()
+    topic_root = etree.parse(self.config.data_path).getroot()
     for topic in topic_root:
         yield self.build_topic(topic.attrib['number'], topic.text)
 
@@ -169,12 +169,12 @@ class CTProc:
     returns:         built CTDocument from processed xml data
     
     """
-    doc_tree = ElementTree.parse(xml_filereader)
+    doc_tree = etree.parse(xml_filereader)
     root = doc_tree.getroot()
 
     docid = root.find('id_info/nct_id').text
     if docid == id_to_print:
-        logger.info(ElementTree.tostring(root, pretty_print=True, encoding='unicode'))
+        logger.info(etree.tostring(root, pretty_print=True, encoding='unicode'))
 
     ct_doc = CTDocument(nct_id=docid, nlp_tools=self.nlp_tools)
     ct_doc.condition = [result.text for result in root.findall('condition')]
@@ -192,7 +192,7 @@ class CTProc:
 
   
   
-  def add_eligibility(self, ct_doc: CTDocument, xml_root: ElementTree) -> CTDocument:
+  def add_eligibility(self, ct_doc: CTDocument, xml_root: etree) -> CTDocument:
     field_val = xml_root.find('eligibility/criteria/textblock')
     if field_val is None:
         logger.info("no eligbility criteria exists for this document")

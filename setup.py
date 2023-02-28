@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ctproc",
-    version="0.2.0",
+    version="0.2.2",
     author="James Kelly",
     author_email="mrkellyjam@gmail.com",
     description="library for processing clinical trials data from clinicaltrials.gov",
