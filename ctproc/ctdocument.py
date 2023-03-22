@@ -2,9 +2,8 @@
 import logging 
 
 import re
-import json
 from lxml import etree
-from typing import Any, Dict, Generator, List, NamedTuple, Optional, Set, Union
+from typing import Dict, List, Optional, Set
 
 from ctproc.ctconfig import CTConfig
 from ctproc.ctbase import CTBase, NLPTools

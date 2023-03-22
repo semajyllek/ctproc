@@ -7,7 +7,7 @@ test_topic = CTTopic(
     id='1', 
     raw_text=' A 19-year-old male came to clinic with some sexual concern. He recently engaged in a relationship and is worried about the satisfaction of his girlfriend. He has a "baby face" according to his girlfriend\'s statement and he is not as muscular as his classmates. On physical examination, there is some pubic hair and poorly developed secondary sexual characteristics. He is unable to detect coffee smell during the examination, but the visual acuity is normal. Ultrasound reveals the testes volume of 1-2 ml. The hormonal evaluation showed serum testosterone level of 65 ng/dL with low levels of GnRH. ', 
 )
-test_topic.gender = 'male'
+test_topic.gender = 'Male'
 test_topic.age = 19.0
 test_topic.text_sents = [
 	' A 19-year-old male came to clinic with some sexual concern.', 

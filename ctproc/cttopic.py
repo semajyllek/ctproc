@@ -1,11 +1,10 @@
 
 import logging
 
-import re
-from typing import Any, Callable, List, Optional
+from typing import Any, List, Optional
 
 from ctproc.ctconfig import CTConfig
-from ctproc.utils import filter_words
+from ctproc.utils import filter_words, convert_age_to_year
 from ctproc.regex_patterns import TOPIC_AGE_GENDER_PATTERN
 from ctproc.ctbase import CTBase, CTEntity, NLPTools
 
@@ -22,6 +21,7 @@ class CTTopic(CTBase):
 		self.ent_sents : Optional[List[List[CTEntity]]] = None
 		self.age: Optional[float] = None
 		self.gender: Optional[str] = None
+		
 
 
 	def get_age_text(self) -> str:
@@ -34,29 +34,21 @@ class CTTopic(CTBase):
 		age_text = self.get_age_text()
 		m = TOPIC_AGE_GENDER_PATTERN.search(age_text)
 		if m is not None:
-			self.age = self.age_to_num_topic(float(m.group('age_val')), m.group('age_unit'))
+			self.age = convert_age_to_year(float(m.group('age_val')), m.group('age_unit'))
 			self.gender = self.map_to_gender_yuck(m.group('gender').strip())
 		else:
 			self.age = 999.0
 			self.gender = "Any"
 
-	def age_to_num_topic(self, val: float, unit: str) -> float:
-		if unit == 'month':
-			return val / 12.0
-		if unit == 'week':
-			return val / 52.0
-		if unit == 'day':
-			return val / 365.0
-		return val
 
 	def map_to_gender_yuck(self, label: str):
 		m = {"boy", "male", "man"}
 		f = {"girl", "female", "woman"}
 		if label in m:
-			return "male"
+			return "Male"
 		if label in f:
-			return "female"
-		return "any"
+			return "Female"
+		return "All"
 
 
 	def add_nlp_features(self, config: CTConfig) -> None:

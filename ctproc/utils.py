@@ -7,7 +7,7 @@ from lxml import etree
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Any
 
-from ctproc.regex_patterns import AGE_PATTERN, EMPTY_PATTERN
+from ctproc.regex_patterns import EMPTY_PATTERN
 from ctproc.skip_crit import SKIP_CRIT
 
 
@@ -31,7 +31,7 @@ def save_docs_jsonl(docs: List[Any], writefile: Path) -> None:
 
 
 
-def get_processed_docs(proc_loc, get_only: Set[str] = {}) -> List[Dict[str, str]]:
+def get_processed_data(proc_loc, get_only: Optional[Set[str]] = None) -> List[Dict[str, str]]:
   """
   proc_loc:    str or path to location of docs in jsonl form
   """
@@ -39,16 +39,18 @@ def get_processed_docs(proc_loc, get_only: Set[str] = {}) -> List[Dict[str, str]
     json_list = list(json_file)
 
   doc_list = [json.loads(json_str) for json_str in json_list]
-  return filter_processed_docs(doc_list, get_only=get_only)
+  if get_only is not None:
+    return filter_processed_data(doc_list, get_only=get_only)
+  return doc_list
 
 
 
-def filter_processed_docs(docs: List[Dict[str, str]], get_only: Set[str]) -> List[Dict[str, str]]:
+def filter_processed_data(docs: List[Dict[str, str]], get_only: Set[str]) -> List[Dict[str, str]]:
   """
   docs:    list of processed docs
   get_only: set of nct_id strings to filter docs by
   """
-  return [doc for doc in docs if doc['nct_id'] in get_only]
+  return [doc for doc in docs if doc['id'] in get_only]
 
 
 
@@ -131,8 +133,10 @@ def convert_age_to_year(age, units):
       if 'm' in units.lower():
         age /= 12.
       elif 'w' in units.lower():
-        age /= 52. 
-  return age 
+        age /= 52.
+      elif 'd' in units.lower():
+        age /= 365. 
+  return round(age, 3) 
 
 
 

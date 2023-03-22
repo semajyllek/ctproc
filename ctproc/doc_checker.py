@@ -6,6 +6,7 @@
 import logging
 from pathlib import Path
 from typing import Optional
+
 from ctproc.ctconfig import CTConfig
 from ctproc.ctdocument import CTDocument
 

@@ -80,6 +80,7 @@ class CTProc:
     """
     desc:      main method for processing a zipped file of clinical trial XML documents from clinicaltrials.gov
     """
+
     with open(self.config.write_file, "w") as outfile:
         proc_func = self.get_proc_func()  # will be either proc_doc_data() or proc_topic_data()
         for processed_obj in proc_func():
