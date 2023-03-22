@@ -78,7 +78,7 @@ class TopicProcTestCase(unittest.TestCase):
     #@unittest.skip
     def test_topic_proc_no_nlp(self):
         topic_config = CTConfig(
-            data_path=test_topic_folder_path, 
+            data_path=trec_topic_folder_path, 
             is_topic=True,
             disable_tqdm=True
         )
@@ -94,7 +94,7 @@ class TopicProcTestCase(unittest.TestCase):
     #@unittest.skip("skip for faster tests") 
     def test_topic_proc(self):
         topic_config = CTConfig(
-            data_path=test_topic_folder_path, 
+            data_path=trec_topic_folder_path, 
             nlp=True,
             is_topic=True,
             disable_tqdm=True

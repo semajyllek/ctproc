@@ -5,7 +5,7 @@ import re
 import json
 from lxml import etree
 from pathlib import Path
-from typing import Generator, List, Optional, Set, Any
+from typing import Dict, List, Optional, Set, Any
 
 from ctproc.regex_patterns import AGE_PATTERN, EMPTY_PATTERN
 from ctproc.skip_crit import SKIP_CRIT
@@ -31,14 +31,24 @@ def save_docs_jsonl(docs: List[Any], writefile: Path) -> None:
 
 
 
-def get_processed_docs(proc_loc):
+def get_processed_docs(proc_loc, get_only: Set[str] = {}) -> List[Dict[str, str]]:
   """
   proc_loc:    str or path to location of docs in jsonl form
   """
   with open(proc_loc, 'r') as json_file:
     json_list = list(json_file)
 
-  return [json.loads(json_str) for json_str in json_list]
+  doc_list = [json.loads(json_str) for json_str in json_list]
+  return filter_processed_docs(doc_list, get_only=get_only)
+
+
+
+def filter_processed_docs(docs: List[Dict[str, str]], get_only: Set[str]) -> List[Dict[str, str]]:
+  """
+  docs:    list of processed docs
+  get_only: set of nct_id strings to filter docs by
+  """
+  return [doc for doc in docs if doc['nct_id'] in get_only]
 
 
 
