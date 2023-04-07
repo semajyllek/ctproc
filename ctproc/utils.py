@@ -121,7 +121,7 @@ def clean_sentences(sent_list: List[str]):
 # age processing utils
 # -------------------------------------------------------------------------------------- #
 
-def convert_age_to_year(age, units):
+def convert_age_to_year(age: Optional[str], units: Optional[str]) -> Optional[float]:
   """
   age:  string result for the age extracted
   unit: string being either years or months (or some variation of those 2)
@@ -136,7 +136,8 @@ def convert_age_to_year(age, units):
         age /= 52.
       elif 'd' in units.lower():
         age /= 365. 
-  return round(age, 3) 
+      age = round(age, 3) 
+  return age
 
 
 
@@ -195,4 +196,5 @@ def print_crit(inc_elig: List[str], exc_elig: List[str]) -> None:
   print('\n'.join(inc_elig))
   print("\nEXC CRIT")
   print('\n'.join(exc_elig))
+
 

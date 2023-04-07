@@ -5,7 +5,7 @@ from typing import Any, List, Optional
 
 from ctproc.ctconfig import CTConfig
 from ctproc.utils import filter_words, convert_age_to_year
-from ctproc.regex_patterns import TOPIC_AGE_GENDER_PATTERN
+from ctproc.regex_patterns import TOPIC_AGE_PATTERN, TOPIC_GENDER_PATTERN
 from ctproc.ctbase import CTBase, CTEntity, NLPTools
 
 logger = logging.getLogger(__file__)
@@ -24,26 +24,36 @@ class CTTopic(CTBase):
 		
 
 
-	def get_age_text(self) -> str:
+	def get_age_and_gender_text(self) -> str:
 		if self.text_sents is None:
 			logger.info("no sentences, using raw text to get topic age")
 			return self.raw_text
 		return self.text_sents[0]
 
-	def add_age_and_gender_data(self) -> None:
-		age_text = self.get_age_text()
-		m = TOPIC_AGE_GENDER_PATTERN.search(age_text)
+
+	def add_age_data(self, text: str) -> None:
+		m = TOPIC_AGE_PATTERN.search(text)
 		if m is not None:
 			self.age = convert_age_to_year(float(m.group('age_val')), m.group('age_unit'))
-			self.gender = self.map_to_gender_yuck(m.group('gender').strip())
 		else:
 			self.age = 999.0
-			self.gender = "Any"
+
+	def add_gender_data(self, text: str) -> str:
+		m = TOPIC_GENDER_PATTERN.search(text)
+		if m is not None:
+			self.gender = self.map_to_gender_yuck(m.group('gender').strip())
+		else:
+			self.gender = "All"
+
+	def add_age_and_gender_data(self) -> None:
+		text = self.get_age_and_gender_text()
+		self.add_age_data(text)
+		self.add_gender_data(text)
 
 
 	def map_to_gender_yuck(self, label: str):
-		m = {"boy", "male", "man"}
-		f = {"girl", "female", "woman"}
+		m = {"boy", "male", "man", "M"}
+		f = {"girl", "female", "woman", "F"}
 		if label in m:
 			return "Male"
 		if label in f:

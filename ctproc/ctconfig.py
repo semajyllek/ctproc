@@ -24,6 +24,8 @@ class CTConfig(NamedTuple):
   concat:             bool, whether to concatenate al the grab_only fields into the contents field
   make_content: 
 
+  is_topic:           bool, whether to treat the data_path as a path to topics, not clinical trials
+  trec:               bool, whether to treat the data_path as a path to trec topic structure, not kz topics (docs are the same structure)
   """
   data_path: Path
   id_to_print: Optional[str] = None
@@ -43,6 +45,7 @@ class CTConfig(NamedTuple):
   
   concat: bool = False
   is_topic: bool = False
+  trec_or_kz: str = 'trec'
 
 
 

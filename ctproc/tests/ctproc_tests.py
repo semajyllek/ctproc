@@ -2,6 +2,8 @@ import logging
 
 import unittest
 
+from pathlib import Path
+
 from ctproc.tests.test_elig import *
 from ctproc.tests.test_doc import test_doc
 from ctproc.tests.test_topic import test_topic
@@ -14,13 +16,8 @@ from ctproc.eligibility import process_eligibility_naive
 
 
 
-# TODO: uncomment, test_doc_folder_path = Path(__file__).parent.joinpath("ct_test_doc_data.zip").as_posix()
-test_doc_folder_path = "/Users/jameskelly/Documents/cp/ctproc/clinicaltrials.gov-16_dec_2015_17.zip"
-
-# test optional support for topic processing
-# TODO: uncomment, test_topic_folder_path = Path(__file__).parent.joinpath("ct_test_topic_data.xml").as_posix()
-test_topic_folder_path = "/Users/jameskelly/Documents/cp/ctproc/ctproc/tests/ct_topic_test_data.xml"
-trec_topic_folder_path = '/Users/jameskelly/Documents/cp/ctmatch/data/trec_data/trec_22_topics.xml'
+test_doc_folder_path = Path(__file__).parent.joinpath("ct_doc_test_data.zip").as_posix()
+test_topic_folder_path = Path(__file__).parent.joinpath("ct_topic_test_data.xml").as_posix()
 
 class DocProcTestCase(unittest.TestCase):
 
@@ -78,7 +75,7 @@ class TopicProcTestCase(unittest.TestCase):
     #@unittest.skip
     def test_topic_proc_no_nlp(self):
         topic_config = CTConfig(
-            data_path=trec_topic_folder_path, 
+            data_path=test_topic_folder_path, 
             is_topic=True,
             disable_tqdm=True
         )
@@ -94,7 +91,7 @@ class TopicProcTestCase(unittest.TestCase):
     #@unittest.skip("skip for faster tests") 
     def test_topic_proc(self):
         topic_config = CTConfig(
-            data_path=trec_topic_folder_path, 
+            data_path=test_topic_folder_path, 
             nlp=True,
             is_topic=True,
             disable_tqdm=True
@@ -107,9 +104,6 @@ class TopicProcTestCase(unittest.TestCase):
         self.assertEqual(id_topic.raw_text, test_topic.raw_text)
         self.assertEqual(id_topic.age, test_topic.age)
         self.assertEqual(id_topic.gender, test_topic.gender)
-
-
-
 
 
 class EligProcTestCase(unittest.TestCase):
