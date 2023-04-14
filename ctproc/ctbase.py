@@ -1,6 +1,6 @@
 
 from typing import Any, Callable, Dict, Generator, List, NamedTuple, Optional, Set, Tuple
-from ctproc.ctconfig import CTConfig
+from ctconfig import CTConfig
 
 
 DONT_ALIAS = {"yo", "girl", "boy", "er", "changes", "patient", "male", "female", "age"}
