@@ -38,7 +38,7 @@ class CTConfig(NamedTuple):
   disable_tqdm: bool = False
 
   # nlp configs
-  remove_stops: bool = True
+  remove_stops: bool = False
   add_ents: bool = True
   max_aliases: int = 2
   expand: bool = False

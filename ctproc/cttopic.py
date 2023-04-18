@@ -3,10 +3,10 @@ import logging
 
 from typing import Any, List, Optional
 
-from ctconfig import CTConfig
-from utils import filter_words, convert_age_to_year
-from regex_patterns import TOPIC_AGE_PATTERN, TOPIC_GENDER_PATTERN
-from ctbase import CTBase, CTEntity, NLPTools
+from ctproc.ctconfig import CTConfig
+from ctproc.utils import filter_words, convert_age_to_year
+from ctproc.regex_patterns import TOPIC_AGE_PATTERN, TOPIC_GENDER_PATTERN
+from ctproc.ctbase import CTBase, CTEntity, NLPTools
 
 logger = logging.getLogger(__file__)
 

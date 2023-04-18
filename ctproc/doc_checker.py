@@ -7,8 +7,8 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from ctconfig import CTConfig
-from ctdocument import CTDocument
+from ctproc.ctconfig import CTConfig
+from ctproc.ctdocument import CTDocument
 
 logger = logging.getLogger(__file__)
 

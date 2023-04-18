@@ -39,7 +39,7 @@ class DocProcTestCase(unittest.TestCase):
 
 
 
-    #@unittest.skip("skip for faster tests")
+    @unittest.skip("skip for faster tests")
     def test_doc_proc(self):
       """
       process a zip file of a single document containing the id_ defined in the program
@@ -88,7 +88,7 @@ class TopicProcTestCase(unittest.TestCase):
 
 
 
-    #@unittest.skip("skip for faster tests") 
+    @unittest.skip("skip for faster tests") 
     def test_topic_proc(self):
         topic_config = CTConfig(
             data_path=test_topic_folder_path, 

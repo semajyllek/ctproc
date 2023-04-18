@@ -7,8 +7,8 @@ from lxml import etree
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Any
 
-from regex_patterns import EMPTY_PATTERN
-from skip_crit import SKIP_CRIT
+from ctproc.regex_patterns import EMPTY_PATTERN
+from ctproc.skip_crit import SKIP_CRIT
 
 
 logger = logging.getLogger(__file__)
