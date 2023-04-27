@@ -5,10 +5,10 @@ import re
 from lxml import etree
 from typing import Dict, List, Optional, Set
 
-from ctproc.ctconfig import CTConfig
-from ctproc.ctbase import CTBase, NLPTools
-from ctproc.regex_patterns import AGE_PATTERN
-from ctproc.utils import get_str_or_none, data_to_str, convert_age_to_year, filter_words
+from ctconfig import CTConfig
+from ctbase import CTBase, NLPTools
+from regex_patterns import AGE_PATTERN
+from utils import get_str_or_none, data_to_str, convert_age_to_year, filter_words
 
 logger = logging.getLogger(__file__)
 
