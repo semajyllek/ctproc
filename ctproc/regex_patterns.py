@@ -1,6 +1,6 @@
 import re
 
-CT_FILE_PATTERN = re.compile("\S+(NCT.*\.xml)")
+CT_FILE_PATTERN = re.compile(r"\S+(NCT.*\.xml)")
 
 EMPTY_PATTERN = re.compile(r'[\n\s]+')
 INC_ONLY_PATTERN = re.compile(r'[\s\n]+[Ii]nclusion [Cc]riteria:?([\w\W ]*)')

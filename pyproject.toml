@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ctproc"
+version = "0.3.0"
+description = "Library for processing clinical trials data from clinicaltrials.gov"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9,<3.13"
+authors = [
+    { name = "James Kelly", email = "mrkellyjam@gmail.com" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "lxml>=4.9",
+    "scipy>=1.7",
+]
+
+[project.optional-dependencies]
+nlp = [
+    "spacy>=3.7,<3.9",
+    "scispacy>=0.5",
+    "negspacy>=1.0",
+]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/semajyllek/ctproc"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ctproc*"]
+
+[tool.ruff]
+line-length = 120

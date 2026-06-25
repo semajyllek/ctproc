@@ -13,15 +13,15 @@ from negspacy.negation import Negex
 from scispacy.linking import EntityLinker 
 from typing import Callable, Generator, List, Optional, Set, Union
 
-from doc_checker import DocChecker as dc
+from .doc_checker import DocChecker as dc
 
-from ctbase import NLPTools
-from cttopic import CTTopic
-from ctconfig import CTConfig
-from utils import print_crit, filter_words
-from ctdocument import CTDocument, EligCrit
-from eligibility import process_eligibility_naive
-from regex_patterns import EMPTY_PATTERN, TOPIC_ID_PATTERN
+from .ctbase import NLPTools
+from .cttopic import CTTopic
+from .ctconfig import CTConfig
+from .utils import print_crit, filter_words
+from .ctdocument import CTDocument, EligCrit
+from .eligibility import process_eligibility_naive
+from .regex_patterns import EMPTY_PATTERN, TOPIC_ID_PATTERN
 
 
 

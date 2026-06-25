@@ -7,8 +7,8 @@ from lxml import etree
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Any
 
-from .regex_patterns import EMPTY_PATTERN
-from .skip_crit import SKIP_CRIT
+from ctproc.regex_patterns import EMPTY_PATTERN
+from ctproc.skip_crit import SKIP_CRIT
 
 
 logger = logging.getLogger(__file__)
@@ -121,7 +121,7 @@ def clean_sentences(sent_list: List[str]):
 # age processing utils
 # -------------------------------------------------------------------------------------- #
 
-def convert_age_to_year(age: Optional[str], units: Optional[str]) -> Optional[float]:
+def convert_age_to_year(age, units):
   """
   age:  string result for the age extracted
   unit: string being either years or months (or some variation of those 2)
@@ -136,8 +136,7 @@ def convert_age_to_year(age: Optional[str], units: Optional[str]) -> Optional[fl
         age /= 52.
       elif 'd' in units.lower():
         age /= 365. 
-      age = round(age, 3) 
-  return age
+  return round(age, 3) 
 
 
 
@@ -196,5 +195,4 @@ def print_crit(inc_elig: List[str], exc_elig: List[str]) -> None:
   print('\n'.join(inc_elig))
   print("\nEXC CRIT")
   print('\n'.join(exc_elig))
-
 
